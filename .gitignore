@@ -1,8 +1,22 @@
 HELP.md
+
+# -------------------------------------------------------
+# Carpeta de compilación - NO incluir en ZIP ni en Git
+# -------------------------------------------------------
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# -------------------------------------------------------
+# Variables de entorno con credenciales reales - NUNCA subir
+# -------------------------------------------------------
+.env
+*.env
+
+# -------------------------------------------------------
+# IDEs
+# -------------------------------------------------------
 
 ### STS ###
 .apt_generated
@@ -31,3 +45,22 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# -------------------------------------------------------
+# Archivos del sistema operativo
+# -------------------------------------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------------------------------------
+# Wallets y certificados Oracle - contienen credenciales
+# -------------------------------------------------------
+wallet/
+Wallet_*/
+*.p12
+*.jks
+cwallet.sso
+ewallet.p12
+tnsnames.ora
+sqlnet.ora
+ojdbc.properties
