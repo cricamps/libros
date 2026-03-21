@@ -1,34 +1,34 @@
 package com.full3.full3.controller;
 
-// Importa la clase Libro.
-// Esta clase representa el objeto que se enviará y recibirá como JSON.
+// Importa la clase Libro del modelo
 import com.full3.full3.model.Libro;
 
-// Importa la capa de servicio.
-// El controller no habla directo con la base de datos;
-// toda la lógica pasa primero por el service.
+// Importa el servicio de libros con la lógica de negocio
 import com.full3.full3.service.LibroService;
 
-// Importa las anotaciones necesarias para construir una API REST.
+// Importa las clases de Spring para construir respuestas HTTP
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+// Importa las anotaciones de Spring para construir la API REST
 import org.springframework.web.bind.annotation.*;
 
-// Importa List para poder devolver una lista de libros.
-import java.util.List;
+// Importa Jakarta Validation para validar el body recibido
+import jakarta.validation.Valid;
 
-// Importa Optional para representar que una búsqueda puede o no encontrar resultado.
-import java.util.Optional;
+// Importa List para devolver listas de libros
+import java.util.List;
 
 // Marca esta clase como un controlador REST.
 // Spring convertirá automáticamente los objetos Java a JSON.
 @RestController
 
 // Define la ruta base de este controlador.
-// Todos los endpoints de esta clase comenzarán con /libros
+// Todos los endpoints de libros comenzarán con /api/libros
 @RequestMapping("/libros")
 public class LibroController {
 
-    // Referencia al servicio de libros.
-    // Desde aquí se llamarán los métodos que contienen la lógica del sistema.
+    // Referencia al servicio de libros
     private final LibroService libroService;
 
     // Constructor con inyección de dependencias.
@@ -39,87 +39,81 @@ public class LibroController {
 
     // ==========================================================
     // LISTAR TODOS LOS LIBROS
+    // GET /api/libros
     // ==========================================================
 
-    // Este método responde a solicitudes HTTP GET sin id.
-    // Ejemplo:
-    // GET http://localhost:8080/libros
+    // Devuelve la lista completa de libros registrados.
+    // Respuesta: 200 OK con arreglo JSON de libros.
     @GetMapping
     public List<Libro> obtenerLibros() {
 
-        // Llama al service para obtener todos los libros registrados.
+        // Delega al servicio para obtener todos los libros
         return libroService.obtenerTodos();
     }
 
     // ==========================================================
-    // BUSCAR UN LIBRO POR SU ID
+    // BUSCAR UN LIBRO POR ID
+    // GET /api/libros/{id}
     // ==========================================================
 
-    // Este método responde a solicitudes HTTP GET con id en la URL.
-    // Ejemplo:
-    // GET http://localhost:8080/libros/1
+    // Busca un libro específico por su clave primaria.
+    // Respuesta: 200 OK si existe, 404 Not Found si no existe.
     @GetMapping("/{id}")
-    public Optional<Libro> obtenerLibro(@PathVariable Long id) {
+    public ResponseEntity<Libro> obtenerLibro(@PathVariable Long id) {
 
-        // @PathVariable toma el valor que viene en la URL
-        // y lo guarda en el parámetro id.
-        //
-        // Luego se delega la búsqueda al service.
-        return libroService.obtenerPorId(id);
+        // Busca el libro y responde según si existe o no
+        return libroService.obtenerPorId(id)
+                .map(libro -> ResponseEntity.ok(libro))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // ==========================================================
     // CREAR UN NUEVO LIBRO
+    // POST /api/libros
     // ==========================================================
 
-    // Este método responde a solicitudes HTTP POST.
-    // Ejemplo:
-    // POST http://localhost:8080/libros
-    //
-    // El libro viaja en el body de la petición en formato JSON.
+    // Crea un libro nuevo en la base de datos.
+    // @Valid activa las validaciones de la entidad
+    // Respuesta: 201 Created con el libro creado.
     @PostMapping
-    public Libro crearLibro(@RequestBody Libro libro) {
+    public ResponseEntity<Libro> crearLibro(@Valid @RequestBody Libro libro) {
 
-        // @RequestBody convierte automáticamente el JSON recibido
-        // en un objeto Java de tipo Libro.
-        //
-        // Luego se llama al service para guardar el libro en Oracle.
-        return libroService.guardar(libro);
+        // Guarda el libro y retorna 201 Created
+        Libro creado = libroService.guardar(libro);
+        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
     // ==========================================================
     // ACTUALIZAR UN LIBRO EXISTENTE
+    // PUT /api/libros/{id}
     // ==========================================================
 
-    // Este método responde a solicitudes HTTP PUT.
-    // Ejemplo:
-    // PUT http://localhost:8080/libros/1
-    //
-    // El id del libro va en la URL.
-    // Los nuevos datos del libro viajan en el body.
+    // Modifica los datos de un libro identificado por su id.
+    // Respuesta: 200 OK si existe, 404 Not Found si no existe.
     @PutMapping("/{id}")
-    public Optional<Libro> actualizarLibro(@PathVariable Long id, @RequestBody Libro libro) {
+    public ResponseEntity<Libro> actualizarLibro(@PathVariable Long id,
+                                                  @Valid @RequestBody Libro libro) {
 
-        // Se envía al service el id a modificar
-        // junto con los nuevos datos del libro.
-        return libroService.actualizar(id, libro);
+        // Delega la actualización al servicio
+        return libroService.actualizar(id, libro)
+                .map(actualizado -> ResponseEntity.ok(actualizado))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // ==========================================================
-    // ELIMINAR UN LIBRO POR SU ID
+    // ELIMINAR UN LIBRO POR ID
+    // DELETE /api/libros/{id}
     // ==========================================================
 
-    // Este método responde a solicitudes HTTP DELETE.
-    // Ejemplo:
-    // DELETE http://localhost:8080/libros/1
+    // Elimina un libro de la base de datos.
+    // Respuesta: 204 No Content si fue eliminado, 404 Not Found si no existía.
     @DeleteMapping("/{id}")
-    public boolean eliminarLibro(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarLibro(@PathVariable Long id) {
 
-        // Llama al service para eliminar el libro.
-        //
-        // Retorna:
-        // true  -> si el libro existía y fue eliminado
-        // false -> si no existía
-        return libroService.eliminar(id);
+        // Intenta eliminar y responde según el resultado
+        if (libroService.eliminar(id)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

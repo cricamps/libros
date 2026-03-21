@@ -1,0 +1,340 @@
+{
+  "info": {
+    "_postman_id": "7a2b9c3d-6e8f-4b1a-9c5d-tienda-tecnologia",
+    "name": "Sumativa 1 - Tienda de Tecnología (Usuarios + Productos)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección completa para el Sistema de Gestión de Pedidos de una Tienda de Tecnología en Línea. Microservicios: Usuarios y Productos. Puerto 8081, ruta base /api."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081/api"
+    }
+  ],
+  "item": [
+    {
+      "name": "MICROSERVICIO 1 - USUARIOS",
+      "item": [
+        {
+          "name": "01 - Listar todos los usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/usuarios",
+            "description": "Obtiene todos los usuarios registrados. Respuesta esperada: 200 OK."
+          }
+        },
+        {
+          "name": "02 - Buscar usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/usuarios/1",
+            "description": "Busca el usuario con id=1. Respuesta esperada: 200 OK o 404 Not Found."
+          }
+        },
+        {
+          "name": "03 - Crear usuario ADMIN",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Laura Admin\",\n  \"email\": \"laura.admin@tienda.cl\",\n  \"password\": \"Admin9999\",\n  \"rol\": \"ADMIN\"\n}"
+            },
+            "url": "{{baseUrl}}/usuarios",
+            "description": "Crea un nuevo usuario con rol ADMIN. Respuesta esperada: 201 Created."
+          }
+        },
+        {
+          "name": "04 - Crear usuario CLIENTE",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Cliente\",\n  \"email\": \"juan.cliente@gmail.com\",\n  \"password\": \"Cliente0001\",\n  \"rol\": \"CLIENTE\"\n}"
+            },
+            "url": "{{baseUrl}}/usuarios",
+            "description": "Crea un nuevo usuario con rol CLIENTE. Respuesta esperada: 201 Created."
+          }
+        },
+        {
+          "name": "05 - Actualizar usuario por ID",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana González Actualizada\",\n  \"email\": \"ana.gonzalez@gmail.com\",\n  \"password\": \"NuevaClave123\",\n  \"rol\": \"CLIENTE\"\n}"
+            },
+            "url": "{{baseUrl}}/usuarios/2",
+            "description": "Actualiza los datos del usuario con id=2. Respuesta esperada: 200 OK o 404 Not Found."
+          }
+        },
+        {
+          "name": "06 - Eliminar usuario por ID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/usuarios/4",
+            "description": "Elimina el usuario con id=4. Respuesta esperada: 204 No Content o 404 Not Found."
+          }
+        },
+        {
+          "name": "07 - Login exitoso (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@tienda.cl\",\n  \"password\": \"Admin1234\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Login con credenciales válidas del administrador. Respuesta esperada: 200 OK con datos del usuario y su rol."
+          }
+        },
+        {
+          "name": "08 - Login exitoso (CLIENTE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.gonzalez@gmail.com\",\n  \"password\": \"Cliente123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Login con credenciales válidas de un cliente. Respuesta esperada: 200 OK con datos del usuario y su rol CLIENTE."
+          }
+        },
+        {
+          "name": "09 - Login fallido (contraseña incorrecta)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@tienda.cl\",\n  \"password\": \"claveincorrecta\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Login con contraseña incorrecta. Respuesta esperada: 401 Unauthorized."
+          }
+        },
+        {
+          "name": "10 - Crear usuario inválido (sin nombre)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"email\": \"test@test.com\",\n  \"password\": \"Test1234\",\n  \"rol\": \"CLIENTE\"\n}"
+            },
+            "url": "{{baseUrl}}/usuarios",
+            "description": "Prueba de validación. Nombre vacío. Respuesta esperada: 400 Bad Request."
+          }
+        },
+        {
+          "name": "11 - Crear usuario inválido (rol incorrecto)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario Test\",\n  \"email\": \"test2@test.com\",\n  \"password\": \"Test1234\",\n  \"rol\": \"SUPERUSUARIO\"\n}"
+            },
+            "url": "{{baseUrl}}/usuarios",
+            "description": "Prueba de validación. Rol inválido (no es ADMIN ni CLIENTE). Respuesta esperada: 400 Bad Request."
+          }
+        },
+        {
+          "name": "12 - Buscar usuario inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/usuarios/9999",
+            "description": "Búsqueda de usuario que no existe. Respuesta esperada: 404 Not Found."
+          }
+        }
+      ]
+    },
+    {
+      "name": "MICROSERVICIO 2 - PRODUCTOS",
+      "item": [
+        {
+          "name": "01 - Listar todos los productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/productos",
+            "description": "Obtiene el catálogo completo de productos. Respuesta esperada: 200 OK."
+          }
+        },
+        {
+          "name": "02 - Buscar producto por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/productos/1",
+            "description": "Busca el producto con id=1 (Laptop Dell). Respuesta esperada: 200 OK o 404 Not Found."
+          }
+        },
+        {
+          "name": "03 - Crear nuevo producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Hub USB-C 7 en 1\",\n  \"descripcion\": \"Hub multipuerto con 3 puertos USB-A, HDMI 4K, SD, MicroSD y carga USB-C de 100W. Compatible con laptops y tablets.\",\n  \"precio\": 39990,\n  \"stock\": 40,\n  \"categoria\": \"Accesorios\"\n}"
+            },
+            "url": "{{baseUrl}}/productos",
+            "description": "Agrega un nuevo producto al catálogo. Respuesta esperada: 201 Created."
+          }
+        },
+        {
+          "name": "04 - Actualizar producto por ID",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Laptop Dell Inspiron 15 - Edición 2025\",\n  \"descripcion\": \"Laptop actualizada con procesador Intel Core i7 de 13va generación, 16GB RAM, 1TB SSD, pantalla 15.6\" Full HD.\",\n  \"precio\": 799990,\n  \"stock\": 10,\n  \"categoria\": \"Laptops\"\n}"
+            },
+            "url": "{{baseUrl}}/productos/1",
+            "description": "Actualiza los datos del producto con id=1. Respuesta esperada: 200 OK o 404 Not Found."
+          }
+        },
+        {
+          "name": "05 - Eliminar producto por ID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/productos/7",
+            "description": "Elimina el producto con id=7 (SSD Externo). Respuesta esperada: 204 No Content o 404 Not Found."
+          }
+        },
+        {
+          "name": "06 - Crear producto inválido (sin nombre)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"descripcion\": \"Descripción de prueba\",\n  \"precio\": 9990,\n  \"stock\": 5,\n  \"categoria\": \"Test\"\n}"
+            },
+            "url": "{{baseUrl}}/productos",
+            "description": "Prueba de validación. Nombre vacío. Respuesta esperada: 400 Bad Request."
+          }
+        },
+        {
+          "name": "07 - Crear producto inválido (precio negativo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto Inválido\",\n  \"descripcion\": \"Este producto tiene precio negativo\",\n  \"precio\": -500,\n  \"stock\": 10,\n  \"categoria\": \"Test\"\n}"
+            },
+            "url": "{{baseUrl}}/productos",
+            "description": "Prueba de validación. Precio negativo. Respuesta esperada: 400 Bad Request."
+          }
+        },
+        {
+          "name": "08 - Buscar producto inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/productos/9999",
+            "description": "Búsqueda de producto que no existe. Respuesta esperada: 404 Not Found."
+          }
+        }
+      ]
+    },
+    {
+      "name": "MICROSERVICIO LIBROS (Semana 1)",
+      "item": [
+        {
+          "name": "01 - Listar libros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/libros",
+            "description": "Obtiene todos los libros. Respuesta esperada: 200 OK."
+          }
+        },
+        {
+          "name": "02 - Crear libro válido",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Clean Code\",\n  \"autor\": \"Robert C. Martin\",\n  \"anioPublicacion\": 2008,\n  \"genero\": \"Programacion\"\n}"
+            },
+            "url": "{{baseUrl}}/libros",
+            "description": "Crea un nuevo libro. Respuesta esperada: 201 Created."
+          }
+        },
+        {
+          "name": "03 - Buscar libro por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/libros/1",
+            "description": "Busca un libro por id. Respuesta esperada: 200 OK o 404 Not Found."
+          }
+        },
+        {
+          "name": "04 - Actualizar libro por ID",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Clean Code - Edición Actualizada\",\n  \"autor\": \"Robert C. Martin\",\n  \"anioPublicacion\": 2009,\n  \"genero\": \"Programacion\"\n}"
+            },
+            "url": "{{baseUrl}}/libros/1",
+            "description": "Actualiza un libro. Respuesta esperada: 200 OK o 404 Not Found."
+          }
+        },
+        {
+          "name": "05 - Eliminar libro por ID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/libros/1",
+            "description": "Elimina un libro. Respuesta esperada: 204 No Content o 404 Not Found."
+          }
+        }
+      ]
+    }
+  ]
+}

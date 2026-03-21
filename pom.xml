@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.11</version>
+		<version>3.5.12</version>
 		<relativePath/>
 	</parent>
 	<groupId>com.full3</groupId>
 	<artifactId>full3</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>full3</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Sistema de Gestion de Pedidos - Tienda de Tecnologia en Linea</description>
 	<properties>
 		<java.version>21</java.version>
 	</properties>
