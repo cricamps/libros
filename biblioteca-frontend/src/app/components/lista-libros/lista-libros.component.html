@@ -1,20 +1,17 @@
 <div class="lista-container">
 
-  <!-- Encabezado -->
   <div class="lista-header">
     <div>
       <h1 class="lista-titulo">📚 Gestión de Libros</h1>
       <p class="lista-subtitulo">Biblioteca DSY2205 — Microservicio Spring Boot + Oracle</p>
     </div>
-    <a routerLink="/libros/nuevo" class="btn btn-success">➕ Nuevo Libro</a>
+    <a routerLink="/agregar" class="btn btn-success">➕ Nuevo Libro</a>
   </div>
 
-  <!-- Alerta de éxito o error -->
   @if (mensaje) {
     <div class="alert" [ngClass]="'alert-' + tipoMensaje">{{ mensaje }}</div>
   }
 
-  <!-- Spinner de carga -->
   @if (cargando) {
     <div class="spinner-wrapper">
       <div class="spinner"></div>
@@ -30,18 +27,16 @@
         <button class="btn btn-secondary btn-sm" (click)="cargarLibros()">🔄 Recargar</button>
       </div>
 
-      <!-- Estado vacío -->
       @if (libros.length === 0) {
         <div class="empty-state">
           <p style="font-size:48px">📭</p>
           <p>No hay libros registrados todavía.</p>
-          <a routerLink="/libros/nuevo" class="btn btn-primary" style="margin-top:16px">
+          <a routerLink="/agregar" class="btn btn-primary" style="margin-top:16px">
             Agregar el primer libro
           </a>
         </div>
       }
 
-      <!-- Tabla de libros -->
       @if (libros.length > 0) {
         <div class="table-responsive">
           <table>
@@ -57,16 +52,18 @@
             </thead>
             <tbody>
               @for (libro of libros; track libro.id) {
-                <tr>
+                <!-- Click en la fila navega al detalle, excepto en la columna de acciones -->
+                <tr class="fila-clickable" (click)="verDetalle(libro.id!)">
                   <td><span class="id-badge">{{ libro.id }}</span></td>
                   <td class="titulo-cell">{{ libro.titulo }}</td>
                   <td>{{ libro.autor }}</td>
                   <td>{{ libro.anioPublicacion }}</td>
                   <td><span class="genero-badge">{{ libro.genero }}</span></td>
-                  <td class="acciones-cell">
+                  <!-- stopPropagation evita que el click en los botones active el click de la fila -->
+                  <td class="acciones-cell" (click)="$event.stopPropagation()">
                     <button class="btn btn-primary btn-sm"  (click)="verDetalle(libro.id!)">👁 Ver</button>
                     <button class="btn btn-warning btn-sm"  (click)="editarLibro(libro.id!)">✏️ Editar</button>
-                    <button class="btn btn-danger btn-sm"   (click)="eliminarLibro(libro.id!, libro.titulo)">🗑 Eliminar</button>
+                    <button class="btn btn-danger btn-sm"   (click)="eliminarLibro(libro.id!, libro.titulo)">🗑</button>
                   </td>
                 </tr>
               }

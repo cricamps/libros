@@ -1,9 +1,7 @@
 // ============================================================
 // COMPONENTE: DetalleLibroComponent
-//
 // Muestra la información completa de un libro específico.
-// Patrón Observer: se suscribe al Observable del servicio
-//   usando el ID de la ruta activa (ActivatedRoute).
+// Ruta: /detalle/:id
 // ============================================================
 
 import { Component, OnInit } from '@angular/core';
@@ -34,19 +32,15 @@ export class DetalleLibroComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-
     if (isNaN(id) || id <= 0) {
       this.error = 'ID de libro inválido.';
       return;
     }
-
     this.cargarLibro(id);
   }
 
-  // Patrón Observer: .subscribe() reacciona al resultado del servicio
   cargarLibro(id: number): void {
     this.cargando = true;
-
     this.libroService.obtenerPorId(id).subscribe({
       next: (libro) => {
         this.libro    = libro;
@@ -59,15 +53,15 @@ export class DetalleLibroComponent implements OnInit {
     });
   }
 
+  // Navega a /editar/:id
   editar(): void {
-    this.router.navigate(['/libros', this.libro!.id, 'editar']);
+    this.router.navigate(['/editar', this.libro!.id]);
   }
 
   eliminar(): void {
     if (!confirm(`¿Eliminar "${this.libro!.titulo}"? Esta acción no se puede deshacer.`)) {
       return;
     }
-
     this.libroService.eliminar(this.libro!.id!).subscribe({
       next: () => this.router.navigate(['/libros']),
       error: (error: Error) => { this.error = error.message; }

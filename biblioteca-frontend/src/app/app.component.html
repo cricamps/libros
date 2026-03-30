@@ -9,23 +9,23 @@
       <a routerLink="/libros"
          routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: true }">
-        Todos los Libros
+        Lista de Libros
       </a>
     </li>
+    <!-- Ruta /agregar según slide 25 del profe -->
     <li>
-      <a routerLink="/libros/nuevo" routerLinkActive="active">
+      <a routerLink="/agregar" routerLinkActive="active">
         + Agregar Libro
       </a>
     </li>
   </ul>
 </nav>
 
-<!-- Contenedor principal: router-outlet renderiza el componente activo -->
+<!-- router-outlet renderiza el componente según la ruta activa -->
 <main class="main-container">
   <router-outlet />
 </main>
 
-<!-- Pie de página -->
 <footer class="footer">
   <p>Cristóbal Camps &mdash; DSY2205 Desarrollo Full Stack III &mdash; Duoc UC</p>
 </footer>
