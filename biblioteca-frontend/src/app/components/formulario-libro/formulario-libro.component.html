@@ -1,0 +1,118 @@
+<div class="form-container">
+
+  <button class="btn btn-secondary btn-sm back-btn" (click)="cancelar()">← Cancelar y volver</button>
+
+  @if (cargando) {
+    <div class="spinner-wrapper">
+      <div class="spinner"></div>
+      <span>Cargando datos del libro...</span>
+    </div>
+  }
+
+  @if (!cargando) {
+    <div class="card form-card">
+
+      <div class="form-header">
+        <h1 class="form-titulo">
+          {{ modo === 'crear' ? '➕ Nuevo Libro' : '✏️ Editar Libro' }}
+        </h1>
+        <p class="form-subtitulo">
+          {{ modo === 'crear'
+            ? 'Completa los campos para agregar un libro a la biblioteca.'
+            : 'Modifica los campos que deseas actualizar.' }}
+        </p>
+      </div>
+
+      @if (mensaje) {
+        <div class="alert" [ngClass]="'alert-' + tipoMensaje">{{ mensaje }}</div>
+      }
+
+      <!-- Formulario template-driven con validación Angular -->
+      <form #libroForm="ngForm" (ngSubmit)="guardar(libroForm)" novalidate>
+
+        <!-- Título -->
+        <div class="form-group">
+          <label for="titulo">📕 Título *</label>
+          <input id="titulo" name="titulo" type="text"
+                 [(ngModel)]="libro.titulo"
+                 required minlength="2" maxlength="200"
+                 placeholder="Ej: Cien años de soledad"
+                 #tituloCtrl="ngModel">
+          @if (tituloCtrl.invalid && tituloCtrl.touched) {
+            <span class="error-msg">
+              @if (tituloCtrl.errors?.['required'])  { El título es obligatorio. }
+              @if (tituloCtrl.errors?.['minlength']) { Debe tener al menos 2 caracteres. }
+            </span>
+          }
+        </div>
+
+        <!-- Autor -->
+        <div class="form-group">
+          <label for="autor">✍️ Autor *</label>
+          <input id="autor" name="autor" type="text"
+                 [(ngModel)]="libro.autor"
+                 required minlength="2" maxlength="200"
+                 placeholder="Ej: Gabriel García Márquez"
+                 #autorCtrl="ngModel">
+          @if (autorCtrl.invalid && autorCtrl.touched) {
+            <span class="error-msg">
+              @if (autorCtrl.errors?.['required'])  { El autor es obligatorio. }
+              @if (autorCtrl.errors?.['minlength']) { Debe tener al menos 2 caracteres. }
+            </span>
+          }
+        </div>
+
+        <!-- Año + Género en fila -->
+        <div class="form-row">
+
+          <div class="form-group">
+            <label for="anio">📅 Año de Publicación *</label>
+            <input id="anio" name="anioPublicacion" type="number"
+                   [(ngModel)]="libro.anioPublicacion"
+                   required min="0" max="2099"
+                   placeholder="Ej: 1967"
+                   #anioCtrl="ngModel">
+            @if (anioCtrl.invalid && anioCtrl.touched) {
+              <span class="error-msg">
+                @if (anioCtrl.errors?.['required']) { El año es obligatorio. }
+                @if (anioCtrl.errors?.['min'])      { El año debe ser mayor o igual a 0. }
+                @if (anioCtrl.errors?.['max'])      { El año no puede superar 2099. }
+              </span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="genero">🏷️ Género *</label>
+            <select id="genero" name="genero"
+                    [(ngModel)]="libro.genero"
+                    required
+                    #generoCtrl="ngModel">
+              <option value="">— Selecciona un género —</option>
+              @for (g of generos; track g) {
+                <option [value]="g">{{ g }}</option>
+              }
+            </select>
+            @if (generoCtrl.invalid && generoCtrl.touched) {
+              <span class="error-msg">Debes seleccionar un género.</span>
+            }
+          </div>
+
+        </div>
+
+        <!-- Botones -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-success" [disabled]="guardando">
+            @if (guardando) {
+              <span class="mini-spinner"></span> Guardando...
+            } @else {
+              {{ modo === 'crear' ? '💾 Guardar Libro' : '💾 Actualizar Libro' }}
+            }
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+        </div>
+
+      </form>
+    </div>
+  }
+
+</div>

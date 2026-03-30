@@ -1,0 +1,50 @@
+.form-container {
+  max-width: 680px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.back-btn  { margin-bottom: 20px; }
+.form-card { padding: 32px; }
+
+.form-titulo    { font-size: 24px; font-weight: 700; color: #1e3a5f; margin-bottom: 6px; }
+.form-subtitulo { font-size: 14px; color: #6b7280; margin-bottom: 24px; }
+.form-header    { margin-bottom: 4px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.mini-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+button[disabled] { opacity: 0.65; cursor: not-allowed; transform: none !important; }
+
+@media (max-width: 500px) {
+  .form-row { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,31 @@
+<!-- Barra de navegación superior -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <span class="navbar-icon">📚</span>
+    <span class="navbar-title">Biblioteca DSY2205</span>
+  </div>
+  <ul class="navbar-links">
+    <li>
+      <a routerLink="/libros"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        Todos los Libros
+      </a>
+    </li>
+    <li>
+      <a routerLink="/libros/nuevo" routerLinkActive="active">
+        + Agregar Libro
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<!-- Contenedor principal: router-outlet renderiza el componente activo -->
+<main class="main-container">
+  <router-outlet />
+</main>
+
+<!-- Pie de página -->
+<footer class="footer">
+  <p>Cristóbal Camps &mdash; DSY2205 Desarrollo Full Stack III &mdash; Duoc UC</p>
+</footer>
