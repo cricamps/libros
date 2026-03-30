@@ -1,0 +1,81 @@
+<div class="lista-container">
+
+  <!-- Encabezado -->
+  <div class="lista-header">
+    <div>
+      <h1 class="lista-titulo">📚 Gestión de Libros</h1>
+      <p class="lista-subtitulo">Biblioteca DSY2205 — Microservicio Spring Boot + Oracle</p>
+    </div>
+    <a routerLink="/libros/nuevo" class="btn btn-success">➕ Nuevo Libro</a>
+  </div>
+
+  <!-- Alerta de éxito o error -->
+  @if (mensaje) {
+    <div class="alert" [ngClass]="'alert-' + tipoMensaje">{{ mensaje }}</div>
+  }
+
+  <!-- Spinner de carga -->
+  @if (cargando) {
+    <div class="spinner-wrapper">
+      <div class="spinner"></div>
+      <span>Cargando libros desde el microservicio...</span>
+    </div>
+  }
+
+  @if (!cargando) {
+    <div class="card table-wrapper">
+
+      <div class="table-info">
+        <span>📖 {{ libros.length }} libro{{ libros.length !== 1 ? 's' : '' }} registrado{{ libros.length !== 1 ? 's' : '' }}</span>
+        <button class="btn btn-secondary btn-sm" (click)="cargarLibros()">🔄 Recargar</button>
+      </div>
+
+      <!-- Estado vacío -->
+      @if (libros.length === 0) {
+        <div class="empty-state">
+          <p style="font-size:48px">📭</p>
+          <p>No hay libros registrados todavía.</p>
+          <a routerLink="/libros/nuevo" class="btn btn-primary" style="margin-top:16px">
+            Agregar el primer libro
+          </a>
+        </div>
+      }
+
+      <!-- Tabla de libros -->
+      @if (libros.length > 0) {
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Año</th>
+                <th>Género</th>
+                <th class="col-acciones">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (libro of libros; track libro.id) {
+                <tr>
+                  <td><span class="id-badge">{{ libro.id }}</span></td>
+                  <td class="titulo-cell">{{ libro.titulo }}</td>
+                  <td>{{ libro.autor }}</td>
+                  <td>{{ libro.anioPublicacion }}</td>
+                  <td><span class="genero-badge">{{ libro.genero }}</span></td>
+                  <td class="acciones-cell">
+                    <button class="btn btn-primary btn-sm"  (click)="verDetalle(libro.id!)">👁 Ver</button>
+                    <button class="btn btn-warning btn-sm"  (click)="editarLibro(libro.id!)">✏️ Editar</button>
+                    <button class="btn btn-danger btn-sm"   (click)="eliminarLibro(libro.id!, libro.titulo)">🗑 Eliminar</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </div>
+  }
+
+</div>
