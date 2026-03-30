@@ -16,17 +16,17 @@
 .form-subtitulo { font-size: 14px; color: #6b7280; margin-bottom: 24px; }
 .form-header    { margin-bottom: 4px; }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
 .form-actions {
   display: flex;
   gap: 12px;
   margin-top: 28px;
   flex-wrap: wrap;
+}
+
+/* Estilo visual para campo inválido — borde rojo como pide el slide */
+.input-invalido {
+  border-color: #dc2626 !important;
+  background-color: #fff5f5;
 }
 
 .mini-spinner {
@@ -46,5 +46,7 @@
 button[disabled] { opacity: 0.65; cursor: not-allowed; transform: none !important; }
 
 @media (max-width: 500px) {
-  .form-row { grid-template-columns: 1fr; }
+  .form-card { padding: 20px; }
+  .form-actions { flex-direction: column; }
+  .form-actions .btn { width: 100%; justify-content: center; }
 }

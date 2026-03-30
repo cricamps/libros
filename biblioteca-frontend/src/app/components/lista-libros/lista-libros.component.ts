@@ -1,11 +1,8 @@
 // ============================================================
 // COMPONENTE: ListaLibrosComponent
-//
 // Vista principal que muestra todos los libros de la biblioteca.
-// Patrón Observer: se suscribe al Observable del servicio para
-//   recibir los datos de forma reactiva.
-// Patrón MVC (Vista): solo renderiza datos, delega la lógica
-//   al servicio (capa Modelo/Facade).
+// Patrón Observer: se suscribe al Observable del servicio.
+// Patrón MVC (Vista): delega la lógica al servicio (Facade).
 // ============================================================
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
@@ -25,18 +22,11 @@ import { Libro }        from '../../models/libro.model';
 })
 export class ListaLibrosComponent implements OnInit, OnDestroy {
 
-  // Lista de libros que se mostrará en la vista
   libros: Libro[] = [];
-
-  // Estado de carga para mostrar spinner mientras se espera respuesta
   cargando = false;
-
-  // Mensaje de éxito o error para el usuario
   mensaje: string | null = null;
   tipoMensaje: 'success' | 'danger' | null = null;
 
-  // Suscripción para liberar memoria cuando el componente se destruye
-  // (Buena práctica con el patrón Observer)
   private suscripcion?: Subscription;
 
   constructor(
@@ -48,15 +38,11 @@ export class ListaLibrosComponent implements OnInit, OnDestroy {
     this.cargarLibros();
   }
 
-  // Libera la suscripción al destruir el componente (evita memory leaks)
   ngOnDestroy(): void {
     this.suscripcion?.unsubscribe();
   }
 
-  // ============================================================
-  // Carga todos los libros desde el microservicio via HTTP
   // Patrón Observer: .subscribe() reacciona cuando llegan los datos
-  // ============================================================
   cargarLibros(): void {
     this.cargando = true;
     this.mensaje  = null;
@@ -74,17 +60,17 @@ export class ListaLibrosComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Navega a /editar/:id
   editarLibro(id: number): void {
-    this.router.navigate(['/libros', id, 'editar']);
+    this.router.navigate(['/editar', id]);
   }
 
+  // Navega a /detalle/:id
   verDetalle(id: number): void {
-    this.router.navigate(['/libros', id]);
+    this.router.navigate(['/detalle', id]);
   }
 
-  // ============================================================
-  // Elimina un libro previa confirmación del usuario
-  // ============================================================
+  // Elimina un libro previa confirmación
   eliminarLibro(id: number, titulo: string): void {
     if (!confirm(`¿Estás seguro de que deseas eliminar "${titulo}"?`)) {
       return;

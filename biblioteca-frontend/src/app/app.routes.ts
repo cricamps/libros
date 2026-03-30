@@ -1,6 +1,7 @@
 // ============================================================
-// RUTAS DE LA APLICACIÓN
+// RUTAS DE LA APLICACIÓN - Semana 3
 // Define la navegación entre los componentes (capa Controlador del MVC)
+// Rutas alineadas con el estándar del curso DSY2205
 // ============================================================
 
 import { Routes } from '@angular/router';
@@ -12,17 +13,17 @@ export const routes: Routes = [
   // Ruta raíz → redirige al listado de libros
   { path: '', redirectTo: 'libros', pathMatch: 'full' },
 
-  // Listado de todos los libros (Vista principal)
+  // GET ALL → Lista completa de libros
   { path: 'libros', component: ListaLibrosComponent },
 
-  // Formulario para crear un nuevo libro (debe ir ANTES de :id)
-  { path: 'libros/nuevo', component: FormularioLibroComponent },
+  // POST → Formulario para crear un nuevo libro
+  { path: 'agregar', component: FormularioLibroComponent },
 
-  // Detalle de un libro específico por ID
-  { path: 'libros/:id', component: DetalleLibroComponent },
+  // PUT → Formulario para editar un libro existente
+  { path: 'editar/:id', component: FormularioLibroComponent },
 
-  // Formulario para editar un libro existente
-  { path: 'libros/:id/editar', component: FormularioLibroComponent },
+  // GET BY ID → Detalle de un libro específico
+  { path: 'detalle/:id', component: DetalleLibroComponent },
 
   // Cualquier ruta desconocida redirige al inicio
   { path: '**', redirectTo: 'libros' }

@@ -28,75 +28,79 @@
       }
 
       <!-- Formulario template-driven con validación Angular -->
+      <!-- #libroForm referencia al estado del formulario NgForm -->
       <form #libroForm="ngForm" (ngSubmit)="guardar(libroForm)" novalidate>
 
-        <!-- Título -->
+        <!-- TÍTULO: required, minlength="2", maxlength="100" según slide 46 -->
         <div class="form-group">
-          <label for="titulo">📕 Título *</label>
+          <label for="titulo">Título *</label>
           <input id="titulo" name="titulo" type="text"
                  [(ngModel)]="libro.titulo"
-                 required minlength="2" maxlength="200"
+                 required minlength="2" maxlength="100"
                  placeholder="Ej: Cien años de soledad"
-                 #tituloCtrl="ngModel">
+                 #tituloCtrl="ngModel"
+                 [class.input-invalido]="tituloCtrl.invalid && tituloCtrl.touched">
           @if (tituloCtrl.invalid && tituloCtrl.touched) {
-            <span class="error-msg">
+            <div class="error-msg">
               @if (tituloCtrl.errors?.['required'])  { El título es obligatorio. }
-              @if (tituloCtrl.errors?.['minlength']) { Debe tener al menos 2 caracteres. }
-            </span>
+              @if (tituloCtrl.errors?.['minlength']) { El título debe tener al menos 2 caracteres. }
+              @if (tituloCtrl.errors?.['maxlength']) { El título no puede superar 100 caracteres. }
+            </div>
           }
         </div>
 
-        <!-- Autor -->
+        <!-- AUTOR: required, minlength="2", maxlength="100" según slide 46 -->
         <div class="form-group">
-          <label for="autor">✍️ Autor *</label>
+          <label for="autor">Autor *</label>
           <input id="autor" name="autor" type="text"
                  [(ngModel)]="libro.autor"
-                 required minlength="2" maxlength="200"
+                 required minlength="2" maxlength="100"
                  placeholder="Ej: Gabriel García Márquez"
-                 #autorCtrl="ngModel">
+                 #autorCtrl="ngModel"
+                 [class.input-invalido]="autorCtrl.invalid && autorCtrl.touched">
           @if (autorCtrl.invalid && autorCtrl.touched) {
-            <span class="error-msg">
+            <div class="error-msg">
               @if (autorCtrl.errors?.['required'])  { El autor es obligatorio. }
-              @if (autorCtrl.errors?.['minlength']) { Debe tener al menos 2 caracteres. }
-            </span>
+              @if (autorCtrl.errors?.['minlength']) { El autor debe tener al menos 2 caracteres. }
+              @if (autorCtrl.errors?.['maxlength']) { El autor no puede superar 100 caracteres. }
+            </div>
           }
         </div>
 
-        <!-- Año + Género en fila -->
-        <div class="form-row">
+        <!-- AÑO: type="number", min="1000", max="2100", required según slide 46 -->
+        <div class="form-group">
+          <label for="anioPublicacion">Año de Publicación *</label>
+          <input id="anioPublicacion" name="anioPublicacion" type="number"
+                 [(ngModel)]="libro.anioPublicacion"
+                 required min="1000" max="2100"
+                 placeholder="Ej: 1967"
+                 #anioCtrl="ngModel"
+                 [class.input-invalido]="anioCtrl.invalid && anioCtrl.touched">
+          @if (anioCtrl.invalid && anioCtrl.touched) {
+            <div class="error-msg">
+              @if (anioCtrl.errors?.['required']) { El año de publicación es obligatorio. }
+              @if (anioCtrl.errors?.['min'])      { El año debe ser mayor o igual a 1000. }
+              @if (anioCtrl.errors?.['max'])      { El año debe ser menor o igual a 2100. }
+            </div>
+          }
+        </div>
 
-          <div class="form-group">
-            <label for="anio">📅 Año de Publicación *</label>
-            <input id="anio" name="anioPublicacion" type="number"
-                   [(ngModel)]="libro.anioPublicacion"
-                   required min="0" max="2099"
-                   placeholder="Ej: 1967"
-                   #anioCtrl="ngModel">
-            @if (anioCtrl.invalid && anioCtrl.touched) {
-              <span class="error-msg">
-                @if (anioCtrl.errors?.['required']) { El año es obligatorio. }
-                @if (anioCtrl.errors?.['min'])      { El año debe ser mayor o igual a 0. }
-                @if (anioCtrl.errors?.['max'])      { El año no puede superar 2099. }
-              </span>
-            }
-          </div>
-
-          <div class="form-group">
-            <label for="genero">🏷️ Género *</label>
-            <select id="genero" name="genero"
-                    [(ngModel)]="libro.genero"
-                    required
-                    #generoCtrl="ngModel">
-              <option value="">— Selecciona un género —</option>
-              @for (g of generos; track g) {
-                <option [value]="g">{{ g }}</option>
-              }
-            </select>
-            @if (generoCtrl.invalid && generoCtrl.touched) {
-              <span class="error-msg">Debes seleccionar un género.</span>
-            }
-          </div>
-
+        <!-- GÉNERO: required, minlength="2", maxlength="50" según slide 46 -->
+        <div class="form-group">
+          <label for="genero">Género *</label>
+          <input id="genero" name="genero" type="text"
+                 [(ngModel)]="libro.genero"
+                 required minlength="2" maxlength="50"
+                 placeholder="Ej: Ciencia Ficción"
+                 #generoCtrl="ngModel"
+                 [class.input-invalido]="generoCtrl.invalid && generoCtrl.touched">
+          @if (generoCtrl.invalid && generoCtrl.touched) {
+            <div class="error-msg">
+              @if (generoCtrl.errors?.['required'])  { El género es obligatorio. }
+              @if (generoCtrl.errors?.['minlength']) { El género debe tener al menos 2 caracteres. }
+              @if (generoCtrl.errors?.['maxlength']) { El género no puede superar 50 caracteres. }
+            </div>
+          }
         </div>
 
         <!-- Botones -->

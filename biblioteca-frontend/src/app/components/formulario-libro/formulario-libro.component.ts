@@ -1,12 +1,11 @@
 // ============================================================
 // COMPONENTE: FormularioLibroComponent
-//
-// Maneja dos casos de uso: CREAR (POST) y EDITAR (PUT).
-// Determina el modo según si la URL contiene un :id o no.
-//
-// Patrón Observer: se suscribe a los Observables del servicio.
-// Patrón MVC (Vista): recibe inputs del usuario y delega la
-//   persistencia al servicio Facade.
+// Maneja CREAR (/agregar) y EDITAR (/editar/:id)
+// Validaciones según slide 46 del curso:
+//   titulo:          required, minlength="2", maxlength="100"
+//   autor:           required, minlength="2", maxlength="100"
+//   anioPublicacion: required, min="1000",    max="2100"
+//   genero:          required, minlength="2", maxlength="50"
 // ============================================================
 
 import { Component, OnInit } from '@angular/core';
@@ -26,17 +25,14 @@ import { Libro }        from '../../models/libro.model';
 })
 export class FormularioLibroComponent implements OnInit {
 
-  // Modo del formulario: 'crear' o 'editar'
   modo: 'crear' | 'editar' = 'crear';
-
-  // ID del libro a editar (solo en modo editar)
   libroId: number | null = null;
 
-  // Objeto enlazado bidirecionalmente con el formulario (two-way binding)
+  // Valor inicial del año dentro del rango permitido (min 1000, max 2100)
   libro: Libro = {
     titulo: '',
     autor: '',
-    anioPublicacion: new Date().getFullYear(),
+    anioPublicacion: 2024,
     genero: ''
   };
 
@@ -44,14 +40,6 @@ export class FormularioLibroComponent implements OnInit {
   guardando   = false;
   mensaje: string | null = null;
   tipoMensaje: 'success' | 'danger' | null = null;
-
-  // Géneros disponibles para el selector
-  readonly generos = [
-    'Ciencia Ficción', 'Fantasía', 'Terror', 'Romance',
-    'Misterio', 'Thriller', 'Historia', 'Biografía',
-    'Ciencia', 'Filosofía', 'Poesía', 'Drama',
-    'Aventura', 'Humor', 'Infantil', 'Otro'
-  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -61,20 +49,15 @@ export class FormularioLibroComponent implements OnInit {
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-
     if (idParam) {
-      // Modo EDITAR: carga los datos actuales del libro
       this.modo    = 'editar';
       this.libroId = Number(idParam);
       this.cargarLibro(this.libroId);
     }
-    // Sin :id → modo CREAR, formulario vacío
   }
 
-  // Patrón Observer: .subscribe() rellena el formulario con los datos actuales
   cargarLibro(id: number): void {
     this.cargando = true;
-
     this.libroService.obtenerPorId(id).subscribe({
       next: (libro) => {
         this.libro    = { ...libro };
@@ -88,14 +71,10 @@ export class FormularioLibroComponent implements OnInit {
     });
   }
 
-  // ============================================================
-  // Maneja el envío del formulario: POST (crear) o PUT (actualizar)
-  // ============================================================
   guardar(form: NgForm): void {
     form.form.markAllAsTouched();
-
     if (form.invalid) {
-      this.mensaje     = 'Por favor, completa todos los campos requeridos.';
+      this.mensaje     = 'Por favor, completa todos los campos requeridos correctamente.';
       this.tipoMensaje = 'danger';
       return;
     }
@@ -107,7 +86,7 @@ export class FormularioLibroComponent implements OnInit {
       this.libroService.crear(this.libro).subscribe({
         next: (creado) => {
           this.guardando = false;
-          this.router.navigate(['/libros', creado.id]);
+          this.router.navigate(['/detalle', creado.id]);
         },
         error: (error: Error) => {
           this.mensaje     = error.message;
@@ -119,7 +98,7 @@ export class FormularioLibroComponent implements OnInit {
       this.libroService.actualizar(this.libroId!, this.libro).subscribe({
         next: (actualizado) => {
           this.guardando = false;
-          this.router.navigate(['/libros', actualizado.id]);
+          this.router.navigate(['/detalle', actualizado.id]);
         },
         error: (error: Error) => {
           this.mensaje     = error.message;
@@ -132,7 +111,7 @@ export class FormularioLibroComponent implements OnInit {
 
   cancelar(): void {
     if (this.modo === 'editar') {
-      this.router.navigate(['/libros', this.libroId]);
+      this.router.navigate(['/detalle', this.libroId]);
     } else {
       this.router.navigate(['/libros']);
     }
