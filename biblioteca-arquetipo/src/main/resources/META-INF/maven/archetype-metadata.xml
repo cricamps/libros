@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-descriptor
+    xmlns="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0
+    https://maven.apache.org/xsd/archetype-descriptor-1.1.0.xsd"
+    name="biblioteca-arquetipo">
+
+    <!--
+        ARCHETYPE-METADATA.XML - DSY2205 Semana 4
+        Define qué archivos forman parte del arquetipo y cuáles
+        deben ser procesados como plantillas con variables.
+    -->
+
+    <fileSets>
+        <!-- Archivos Java: se procesan como plantillas (filtered=true) -->
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>src/main/java</directory>
+            <includes>
+                <include>**/*.java</include>
+            </includes>
+        </fileSet>
+
+        <!-- Recursos: application.properties también se procesa como plantilla -->
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>**/*.properties</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+
+</archetype-descriptor>
