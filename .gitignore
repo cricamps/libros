@@ -47,6 +47,21 @@ build/
 .vscode/
 
 # -------------------------------------------------------
+# Angular / Node
+# -------------------------------------------------------
+node_modules/
+.angular/
+dist/
+.npm/
+npm-debug.log*
+tienda-frontend/node_modules/
+tienda-frontend/.angular/
+tienda-frontend/dist/
+biblioteca-frontend/node_modules/
+biblioteca-frontend/.angular/
+biblioteca-frontend/dist/
+
+# -------------------------------------------------------
 # Archivos del sistema operativo
 # -------------------------------------------------------
 .DS_Store
