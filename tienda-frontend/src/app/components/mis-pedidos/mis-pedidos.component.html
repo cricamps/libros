@@ -1,0 +1,62 @@
+<div class="page-header">
+  <div class="container">
+    <h2><i class="bi bi-bag-check me-2"></i>Mis Pedidos</h2>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Sin pedidos -->
+  <div *ngIf="pedidos.length === 0" class="text-center py-5">
+    <div style="font-size:5rem">📦</div>
+    <h4 class="text-muted mt-3">Aún no tienes pedidos</h4>
+    <p class="text-muted small">¡Explora el catálogo y realiza tu primera compra!</p>
+    <a class="btn btn-techstore mt-2" routerLink="/catalogo">
+      <i class="bi bi-grid me-2"></i>Ver catálogo
+    </a>
+  </div>
+
+  <!-- Lista de pedidos -->
+  <div *ngFor="let pedido of pedidos" class="card border-0 shadow-sm mb-4" style="border-radius:12px; overflow:hidden">
+
+    <!-- Cabecera pedido -->
+    <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center py-3"
+         style="background:linear-gradient(135deg,#0d1b2a,#1b6ca8); color:white">
+      <div>
+        <span class="fw-bold fs-6">Pedido #{{ pedido.id }}</span>
+        <span class="ms-3 text-white-50 small">
+          <i class="bi bi-calendar3 me-1"></i>{{ pedido.fecha }}
+        </span>
+      </div>
+      <span class="badge mt-2 mt-sm-0 px-3 py-2" [class]="getBadgeClass(pedido.estado)">
+        {{ pedido.estado }}
+      </span>
+    </div>
+
+    <!-- Items del pedido -->
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-12" *ngFor="let item of pedido.items">
+          <div class="d-flex align-items-center gap-3 p-2 rounded"
+               style="background:#f8f9fa">
+            <span style="font-size:1.8rem">{{ item.producto.icono }}</span>
+            <div class="flex-grow-1">
+              <div class="fw-semibold small">{{ item.producto.nombre }}</div>
+              <small class="text-muted">x{{ item.cantidad }} — {{ formatearPrecio(item.producto.precio) }} c/u</small>
+            </div>
+            <div class="fw-bold text-primary small">
+              {{ formatearPrecio(item.producto.precio * item.cantidad) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+        <span class="text-muted small">Total del pedido</span>
+        <span class="fw-bold fs-5 text-primary">{{ formatearPrecio(pedido.total) }}</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>

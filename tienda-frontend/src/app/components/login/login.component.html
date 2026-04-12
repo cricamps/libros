@@ -1,0 +1,98 @@
+<div class="min-vh-100 d-flex align-items-center"
+     style="background: linear-gradient(135deg,#0d1b2a 0%,#1b6ca8 100%)">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-9 col-md-7 col-lg-5">
+
+        <div class="form-card">
+          <!-- Logo -->
+          <div class="logo-area">
+            <div class="logo-icon">🖥️</div>
+            <h2>TechStore</h2>
+            <p class="text-muted small">Inicia sesión para continuar</p>
+          </div>
+
+          <!-- Alerta de error -->
+          <div class="alert alert-danger d-flex align-items-center" *ngIf="error">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error }}
+          </div>
+
+          <!-- Formulario -->
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label class="form-label">Correo electrónico</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control"
+                       formControlName="email"
+                       placeholder="tu@email.cl"
+                       [class.is-invalid]="email.invalid && email.touched"
+                       [class.is-valid]="email.valid && email.touched">
+                <div class="invalid-feedback">
+                  <span *ngIf="email.errors?.['required']">El correo es obligatorio.</span>
+                  <span *ngIf="email.errors?.['email']">Ingresa un correo válido.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+              <label class="form-label">Contraseña</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input [type]="mostrarPassword ? 'text' : 'password'"
+                       class="form-control"
+                       formControlName="password"
+                       placeholder="Tu contraseña"
+                       [class.is-invalid]="password.invalid && password.touched"
+                       [class.is-valid]="password.valid && password.touched">
+                <button class="btn btn-outline-secondary" type="button"
+                        (click)="togglePassword()">
+                  <i class="bi" [class.bi-eye]="!mostrarPassword" [class.bi-eye-slash]="mostrarPassword"></i>
+                </button>
+                <div class="invalid-feedback">
+                  <span *ngIf="password.errors?.['required']">La contraseña es obligatoria.</span>
+                  <span *ngIf="password.errors?.['minlength']">Mínimo 6 caracteres.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botón -->
+            <button type="submit" class="btn btn-techstore w-100 py-2"
+                    [disabled]="cargando">
+              <span *ngIf="cargando" class="spinner-border spinner-border-sm me-2"></span>
+              <span *ngIf="!cargando"><i class="bi bi-box-arrow-in-right me-2"></i></span>
+              {{ cargando ? 'Ingresando...' : 'Iniciar Sesión' }}
+            </button>
+          </form>
+
+          <hr class="my-3">
+
+          <!-- Links -->
+          <div class="text-center small">
+            <a routerLink="/recuperar-contrasena" class="text-decoration-none">
+              <i class="bi bi-key me-1"></i> ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+          <div class="text-center small mt-2">
+            ¿No tienes cuenta?
+            <a routerLink="/registro" class="text-decoration-none fw-semibold">
+              Regístrate aquí
+            </a>
+          </div>
+
+          <!-- Credenciales demo -->
+          <div class="alert alert-info mt-3 small">
+            <strong>Demo:</strong><br>
+            Admin: <code>admin&#64;techstore.cl</code> / <code>Admin&#64;123</code><br>
+            Cliente: <code>juan&#64;cliente.cl</code> / <code>Cliente&#64;123</code>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

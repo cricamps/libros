@@ -1,0 +1,49 @@
+# ============================================================
+# docker-compose.yml - TechStore FullStack
+# Sumativa 2 - DSY2205
+#
+# Servicios:
+#   1. tienda-frontend  → Angular + Nginx  (puerto 80)
+#   2. ms-pedidos       → Spring Boot      (puerto 8083)
+#
+# INSTRUCCIONES:
+#   docker-compose up --build
+#   FrontEnd : http://localhost
+#   BackEnd  : http://localhost:8083/api/productos
+# ============================================================
+
+version: '3.8'
+
+services:
+
+  # ── FrontEnd Angular (Nginx) ──────────────────────────────
+  tienda-frontend:
+    build:
+      context: ./tienda-frontend
+      dockerfile: Dockerfile
+    container_name: techstore-frontend
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - techstore-net
+
+  # ── BackEnd ms-pedidos (Spring Boot + Oracle Cloud) ───────
+  ms-pedidos:
+    build:
+      context: ./ms-pedidos
+      dockerfile: Dockerfile
+    container_name: techstore-ms-pedidos
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_URL=jdbc:oracle:thin:@(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g1c6677be04d407_bibliotecadb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=no)))
+      - DB_USERNAME=ADMIN
+      - DB_PASSWORD=Biblioteca2026X
+    restart: unless-stopped
+    networks:
+      - techstore-net
+
+networks:
+  techstore-net:
+    driver: bridge

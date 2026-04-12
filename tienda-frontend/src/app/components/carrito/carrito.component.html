@@ -1,0 +1,126 @@
+<div class="page-header">
+  <div class="container">
+    <h2><i class="bi bi-cart3 me-2"></i>Mi Carrito</h2>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Pedido confirmado -->
+  <div *ngIf="pedidoRealizado" class="text-center py-5">
+    <div style="font-size:5rem">🎉</div>
+    <h3 class="text-success mt-3">¡Pedido confirmado!</h3>
+    <p class="text-muted">Tu pedido <strong>#{{ numeroPedido }}</strong> ha sido recibido y está siendo procesado.</p>
+    <div class="d-flex gap-3 justify-content-center mt-4">
+      <button class="btn btn-techstore" (click)="seguirComprando()">
+        <i class="bi bi-grid me-2"></i>Seguir comprando
+      </button>
+      <a class="btn btn-outline-techstore" routerLink="/mis-pedidos">
+        <i class="bi bi-bag-check me-2"></i>Ver mis pedidos
+      </a>
+    </div>
+  </div>
+
+  <!-- Carrito vacío -->
+  <div *ngIf="!pedidoRealizado && items.length === 0" class="text-center py-5">
+    <div style="font-size:5rem">🛒</div>
+    <h4 class="text-muted mt-3">Tu carrito está vacío</h4>
+    <p class="text-muted small">Agrega productos desde el catálogo.</p>
+    <button class="btn btn-techstore mt-2" (click)="seguirComprando()">
+      <i class="bi bi-grid me-2"></i>Ver catálogo
+    </button>
+  </div>
+
+  <!-- Items del carrito -->
+  <div *ngIf="!pedidoRealizado && items.length > 0">
+    <div class="row g-4">
+
+      <!-- Lista -->
+      <div class="col-12 col-lg-8">
+        <div class="tabla-admin">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th class="text-center">Cantidad</th>
+                <th class="text-end">Subtotal</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items">
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <span style="font-size:2rem">{{ item.producto.icono }}</span>
+                    <div>
+                      <div class="fw-semibold">{{ item.producto.nombre }}</div>
+                      <small class="text-muted">{{ formatearPrecio(item.producto.precio) }} c/u</small>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex align-items-center justify-content-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary"
+                            (click)="cambiarCantidad(item.producto.id, item.cantidad - 1)">
+                      <i class="bi bi-dash"></i>
+                    </button>
+                    <span class="fw-bold px-2">{{ item.cantidad }}</span>
+                    <button class="btn btn-sm btn-outline-secondary"
+                            (click)="cambiarCantidad(item.producto.id, item.cantidad + 1)">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+                </td>
+                <td class="text-end fw-bold">
+                  {{ formatearPrecio(item.producto.precio * item.cantidad) }}
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-danger"
+                          (click)="quitar(item.producto.id)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Resumen -->
+      <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm p-4" style="border-radius:12px; position:sticky; top:80px">
+          <h5 class="fw-bold mb-4">Resumen del Pedido</h5>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Subtotal</span>
+            <span>{{ formatearPrecio(getTotal()) }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Despacho</span>
+            <span class="text-success fw-semibold">Gratis</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between mb-4">
+            <span class="fw-bold fs-5">Total</span>
+            <span class="fw-bold fs-5 text-primary">{{ formatearPrecio(getTotal()) }}</span>
+          </div>
+
+          <!-- Simulación de pago -->
+          <div class="alert alert-info small mb-3">
+            <i class="bi bi-info-circle me-2"></i>
+            Pago simulado — no se procesarán cargos reales.
+          </div>
+
+          <button class="btn btn-techstore w-100 py-2" (click)="confirmarPedido()">
+            <i class="bi bi-bag-check me-2"></i>Confirmar Pedido
+          </button>
+          <button class="btn btn-outline-secondary w-100 mt-2" (click)="seguirComprando()">
+            <i class="bi bi-arrow-left me-2"></i>Seguir comprando
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

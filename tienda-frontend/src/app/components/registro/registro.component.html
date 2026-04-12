@@ -1,0 +1,193 @@
+<div class="min-vh-100 d-flex align-items-center py-4"
+     style="background: linear-gradient(135deg,#0d1b2a 0%,#1b6ca8 100%)">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+
+        <div class="form-card" style="max-width:600px">
+          <div class="logo-area">
+            <div class="logo-icon">📝</div>
+            <h2>Crear Cuenta</h2>
+            <p class="text-muted small">Completa los datos para registrarte</p>
+          </div>
+
+          <!-- Éxito -->
+          <div class="alert alert-success d-flex align-items-center" *ngIf="exito">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            ¡Registro exitoso! Redirigiendo al login...
+          </div>
+
+          <!-- Error -->
+          <div class="alert alert-danger d-flex align-items-center" *ngIf="error">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error }}
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate *ngIf="!exito">
+
+            <!-- Nombre y Apellido -->
+            <div class="row g-3 mb-3">
+              <div class="col-12 col-sm-6">
+                <label class="form-label">Nombre *</label>
+                <input type="text" class="form-control" formControlName="nombre"
+                       placeholder="Juan"
+                       [class.is-invalid]="nombre.invalid && nombre.touched"
+                       [class.is-valid]="nombre.valid && nombre.touched">
+                <div class="invalid-feedback">
+                  <span *ngIf="nombre.errors?.['required']">El nombre es obligatorio.</span>
+                  <span *ngIf="nombre.errors?.['minlength']">Mínimo 2 caracteres.</span>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <label class="form-label">Apellido *</label>
+                <input type="text" class="form-control" formControlName="apellido"
+                       placeholder="Pérez"
+                       [class.is-invalid]="apellido.invalid && apellido.touched"
+                       [class.is-valid]="apellido.valid && apellido.touched">
+                <div class="invalid-feedback">
+                  <span *ngIf="apellido.errors?.['required']">El apellido es obligatorio.</span>
+                  <span *ngIf="apellido.errors?.['minlength']">Mínimo 2 caracteres.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label class="form-label">Correo electrónico *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" formControlName="email"
+                       placeholder="tu@email.cl"
+                       [class.is-invalid]="email.invalid && email.touched"
+                       [class.is-valid]="email.valid && email.touched">
+                <div class="invalid-feedback">
+                  <span *ngIf="email.errors?.['required']">El correo es obligatorio.</span>
+                  <span *ngIf="email.errors?.['email']">Ingresa un correo válido.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="mb-3">
+              <label class="form-label">Teléfono</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                <input type="tel" class="form-control" formControlName="telefono"
+                       placeholder="+56912345678"
+                       [class.is-invalid]="telefono.invalid && telefono.touched"
+                       [class.is-valid]="telefono.valid && telefono.touched && telefono.value">
+                <div class="invalid-feedback">Formato inválido (ej: +56912345678).</div>
+              </div>
+            </div>
+
+            <!-- Dirección -->
+            <div class="mb-3">
+              <label class="form-label">Dirección *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                <input type="text" class="form-control" formControlName="direccion"
+                       placeholder="Av. Principal 123, Santiago"
+                       [class.is-invalid]="direccion.invalid && direccion.touched"
+                       [class.is-valid]="direccion.valid && direccion.touched">
+                <div class="invalid-feedback">
+                  <span *ngIf="direccion.errors?.['required']">La dirección es obligatoria.</span>
+                  <span *ngIf="direccion.errors?.['minlength']">Mínimo 5 caracteres.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-2">
+              <label class="form-label">Contraseña *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input [type]="mostrarPassword ? 'text' : 'password'"
+                       class="form-control" formControlName="password"
+                       placeholder="Mín. 8 caracteres"
+                       [class.is-invalid]="password.invalid && password.touched"
+                       [class.is-valid]="password.valid && password.touched">
+                <button class="btn btn-outline-secondary" type="button"
+                        (click)="mostrarPassword = !mostrarPassword">
+                  <i class="bi" [class.bi-eye]="!mostrarPassword" [class.bi-eye-slash]="mostrarPassword"></i>
+                </button>
+              </div>
+
+              <!-- Barra de fortaleza -->
+              <div *ngIf="password.value" class="mt-1">
+                <div class="password-strength"
+                     [style.width.%]="getFuerzaPassword() * 25"
+                     [style.background-color]="getFuerzaColor()">
+                </div>
+                <small [style.color]="getFuerzaColor()" class="fw-semibold">
+                  {{ getFuerzaTexto() }}
+                </small>
+              </div>
+
+              <!-- Reglas de contraseña -->
+              <div class="mt-2 small text-muted" *ngIf="password.touched || password.value">
+                <div [class.text-success]="!password.errors?.['minLength']"
+                     [class.text-danger]="password.errors?.['minLength']">
+                  <i class="bi" [class.bi-check-circle]="!password.errors?.['minLength']"
+                               [class.bi-x-circle]="password.errors?.['minLength']"></i>
+                  Mínimo 8 caracteres
+                </div>
+                <div [class.text-success]="!password.errors?.['maxLength']"
+                     [class.text-danger]="password.errors?.['maxLength']">
+                  <i class="bi" [class.bi-check-circle]="!password.errors?.['maxLength']"
+                               [class.bi-x-circle]="password.errors?.['maxLength']"></i>
+                  Máximo 20 caracteres
+                </div>
+                <div [class.text-success]="!password.errors?.['sinNumero']"
+                     [class.text-danger]="password.errors?.['sinNumero']">
+                  <i class="bi" [class.bi-check-circle]="!password.errors?.['sinNumero']"
+                               [class.bi-x-circle]="password.errors?.['sinNumero']"></i>
+                  Al menos un número
+                </div>
+                <div [class.text-success]="!password.errors?.['sinEspecial']"
+                     [class.text-danger]="password.errors?.['sinEspecial']">
+                  <i class="bi" [class.bi-check-circle]="!password.errors?.['sinEspecial']"
+                               [class.bi-x-circle]="password.errors?.['sinEspecial']"></i>
+                  Al menos un carácter especial (!&#64;#$%...)
+                </div>
+                <div [class.text-success]="!password.errors?.['sinMayuscula']"
+                     [class.text-danger]="password.errors?.['sinMayuscula']">
+                  <i class="bi" [class.bi-check-circle]="!password.errors?.['sinMayuscula']"
+                               [class.bi-x-circle]="password.errors?.['sinMayuscula']"></i>
+                  Al menos una letra mayúscula
+                </div>
+              </div>
+            </div>
+
+            <!-- Confirmar password -->
+            <div class="mb-4">
+              <label class="form-label">Confirmar contraseña *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input [type]="mostrarConfirm ? 'text' : 'password'"
+                       class="form-control" formControlName="confirmarPassword"
+                       placeholder="Repite la contraseña"
+                       [class.is-invalid]="(confirmarPassword.touched && form.errors?.['noCoinciden'])"
+                       [class.is-valid]="confirmarPassword.touched && !form.errors?.['noCoinciden'] && confirmarPassword.value">
+                <button class="btn btn-outline-secondary" type="button"
+                        (click)="mostrarConfirm = !mostrarConfirm">
+                  <i class="bi" [class.bi-eye]="!mostrarConfirm" [class.bi-eye-slash]="mostrarConfirm"></i>
+                </button>
+                <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-techstore w-100 py-2">
+              <i class="bi bi-person-plus me-2"></i> Crear Cuenta
+            </button>
+          </form>
+
+          <div class="text-center small mt-3">
+            ¿Ya tienes cuenta?
+            <a routerLink="/login" class="text-decoration-none fw-semibold">Inicia sesión</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

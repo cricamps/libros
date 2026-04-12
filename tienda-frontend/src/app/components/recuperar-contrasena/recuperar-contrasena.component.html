@@ -1,0 +1,124 @@
+<div class="min-vh-100 d-flex align-items-center"
+     style="background: linear-gradient(135deg,#0d1b2a 0%,#1b6ca8 100%)">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-9 col-md-7 col-lg-5">
+        <div class="form-card">
+
+          <div class="logo-area">
+            <div class="logo-icon">🔑</div>
+            <h2>Recuperar Contraseña</h2>
+          </div>
+
+          <!-- Progreso -->
+          <div class="d-flex justify-content-center gap-2 mb-4">
+            <span class="badge rounded-pill px-3 py-2"
+                  [class.bg-primary]="paso >= 1" [class.bg-secondary]="paso < 1">1. Email</span>
+            <span class="badge rounded-pill px-3 py-2"
+                  [class.bg-primary]="paso >= 2" [class.bg-secondary]="paso < 2">2. Código</span>
+            <span class="badge rounded-pill px-3 py-2"
+                  [class.bg-primary]="paso >= 3" [class.bg-secondary]="paso < 3">3. Nueva clave</span>
+          </div>
+
+          <div class="alert alert-danger" *ngIf="error">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+          </div>
+
+          <!-- Paso 1: Email -->
+          <form [formGroup]="form" (ngSubmit)="enviarEmail()" *ngIf="paso === 1" novalidate>
+            <p class="text-muted small">Ingresa tu correo y te enviaremos un código de verificación.</p>
+            <div class="mb-3">
+              <label class="form-label">Correo electrónico</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" formControlName="email"
+                       placeholder="tu@email.cl"
+                       [class.is-invalid]="email.invalid && email.touched">
+                <div class="invalid-feedback">
+                  <span *ngIf="email.errors?.['required']">El correo es obligatorio.</span>
+                  <span *ngIf="email.errors?.['email']">Correo no válido.</span>
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-techstore w-100">
+              <i class="bi bi-send me-2"></i>Enviar Código
+            </button>
+          </form>
+
+          <!-- Paso 2: Código -->
+          <form [formGroup]="formCodigo" (ngSubmit)="verificarCodigo()" *ngIf="paso === 2" novalidate>
+            <div class="alert alert-info small">
+              <i class="bi bi-info-circle me-2"></i>
+              Se ha enviado un código de 6 dígitos a <strong>{{ email.value }}</strong>.
+              <br><em>(Demo: revisa la consola del navegador)</em>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Código de verificación</label>
+              <input type="text" class="form-control text-center fs-4 letter-spacing-wide"
+                     formControlName="codigo" maxlength="6" placeholder="000000"
+                     [class.is-invalid]="codigo.invalid && codigo.touched">
+              <div class="invalid-feedback">Ingresa el código de 6 dígitos.</div>
+            </div>
+            <button type="submit" class="btn btn-techstore w-100">
+              <i class="bi bi-check-circle me-2"></i>Verificar Código
+            </button>
+          </form>
+
+          <!-- Paso 3: Nueva contraseña -->
+          <form [formGroup]="formNueva" (ngSubmit)="cambiarPassword()" *ngIf="paso === 3" novalidate>
+            <div class="mb-3">
+              <label class="form-label">Nueva contraseña</label>
+              <div class="input-group">
+                <input [type]="mostrarPassword ? 'text' : 'password'"
+                       class="form-control" formControlName="password"
+                       placeholder="Mín. 8 caracteres"
+                       [class.is-invalid]="nuevaPass.invalid && nuevaPass.touched">
+                <button class="btn btn-outline-secondary" type="button"
+                        (click)="mostrarPassword = !mostrarPassword">
+                  <i class="bi" [class.bi-eye]="!mostrarPassword" [class.bi-eye-slash]="mostrarPassword"></i>
+                </button>
+                <div class="invalid-feedback">
+                  Mínimo 8 caracteres, con número, mayúscula y carácter especial.
+                </div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Confirmar contraseña</label>
+              <div class="input-group">
+                <input [type]="mostrarConfirm ? 'text' : 'password'"
+                       class="form-control" formControlName="confirmarPassword"
+                       placeholder="Repite la contraseña"
+                       [class.is-invalid]="confirmPass.touched && nuevaPass.value !== confirmPass.value">
+                <button class="btn btn-outline-secondary" type="button"
+                        (click)="mostrarConfirm = !mostrarConfirm">
+                  <i class="bi" [class.bi-eye]="!mostrarConfirm" [class.bi-eye-slash]="mostrarConfirm"></i>
+                </button>
+                <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-techstore w-100">
+              <i class="bi bi-shield-lock me-2"></i>Cambiar Contraseña
+            </button>
+          </form>
+
+          <!-- Paso 4: Éxito -->
+          <div *ngIf="paso === 4" class="text-center py-3">
+            <div style="font-size:4rem">✅</div>
+            <h4 class="text-success mt-2">¡Contraseña actualizada!</h4>
+            <p class="text-muted">Tu contraseña ha sido cambiada exitosamente.</p>
+            <a routerLink="/login" class="btn btn-techstore">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Ir al Login
+            </a>
+          </div>
+
+          <div class="text-center small mt-3" *ngIf="paso < 4">
+            <a routerLink="/login" class="text-decoration-none">
+              <i class="bi bi-arrow-left me-1"></i>Volver al Login
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

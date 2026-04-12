@@ -1,0 +1,104 @@
+<div class="page-header">
+  <div class="container">
+    <h2><i class="bi bi-person-circle me-2"></i>Mi Perfil</h2>
+  </div>
+</div>
+
+<div class="container pb-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+
+      <!-- Avatar card -->
+      <div class="card border-0 shadow-sm mb-4 text-center p-4" style="border-radius:12px">
+        <div style="font-size:5rem">👤</div>
+        <h4 class="mt-2 mb-0 fw-bold">{{ usuario.nombre }} {{ usuario.apellido }}</h4>
+        <span class="badge mt-2 px-3 py-2"
+              [class.bg-warning]="usuario.rol === 'ADMIN'"
+              [class.bg-info]="usuario.rol === 'CLIENTE'"
+              style="font-size:0.85rem">
+          {{ usuario.rol }}
+        </span>
+        <p class="text-muted small mt-2 mb-0">
+          <i class="bi bi-calendar3 me-1"></i>
+          Miembro desde {{ usuario.fechaRegistro | date:'dd/MM/yyyy' }}
+        </p>
+      </div>
+
+      <!-- Formulario edición -->
+      <div class="card border-0 shadow-sm p-4" style="border-radius:12px">
+        <h5 class="fw-bold mb-4"><i class="bi bi-pencil-square me-2 text-primary"></i>Editar Datos</h5>
+
+        <div class="alert alert-success" *ngIf="exito">
+          <i class="bi bi-check-circle me-2"></i>¡Perfil actualizado correctamente!
+        </div>
+        <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-sm-6">
+              <label class="form-label">Nombre *</label>
+              <input type="text" class="form-control" formControlName="nombre"
+                     [class.is-invalid]="nombre.invalid && nombre.touched"
+                     [class.is-valid]="nombre.valid && nombre.touched">
+              <div class="invalid-feedback">
+                <span *ngIf="nombre.errors?.['required']">Obligatorio.</span>
+                <span *ngIf="nombre.errors?.['minlength']">Mínimo 2 caracteres.</span>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label">Apellido *</label>
+              <input type="text" class="form-control" formControlName="apellido"
+                     [class.is-invalid]="apellido.invalid && apellido.touched"
+                     [class.is-valid]="apellido.valid && apellido.touched">
+              <div class="invalid-feedback">
+                <span *ngIf="apellido.errors?.['required']">Obligatorio.</span>
+                <span *ngIf="apellido.errors?.['minlength']">Mínimo 2 caracteres.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Correo electrónico</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control bg-light" formControlName="email">
+            </div>
+            <small class="text-muted">El correo no puede modificarse.</small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Teléfono</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-phone"></i></span>
+              <input type="tel" class="form-control" formControlName="telefono"
+                     placeholder="+56912345678"
+                     [class.is-invalid]="telefono.invalid && telefono.touched"
+                     [class.is-valid]="telefono.valid && telefono.touched && telefono.value">
+              <div class="invalid-feedback">Formato inválido.</div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Dirección *</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+              <input type="text" class="form-control" formControlName="direccion"
+                     [class.is-invalid]="direccion.invalid && direccion.touched"
+                     [class.is-valid]="direccion.valid && direccion.touched">
+              <div class="invalid-feedback">
+                <span *ngIf="direccion.errors?.['required']">Obligatorio.</span>
+                <span *ngIf="direccion.errors?.['minlength']">Mínimo 5 caracteres.</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-techstore w-100 py-2">
+            <i class="bi bi-save me-2"></i>Guardar Cambios
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
