@@ -1,49 +1,66 @@
 # ============================================================
-# docker-compose.yml - TechStore FullStack
-# Sumativa 2 - DSY2205
+# docker-compose.yml - Biblioteca FullStack
+# DSY2205 - Semana 6 - Actividad Formativa 4
 #
 # Servicios:
-#   1. tienda-frontend  → Angular + Nginx  (puerto 80)
-#   2. ms-pedidos       → Spring Boot      (puerto 8083)
+#   1. biblioteca-backend   → Spring Boot      (puerto 8082)
+#   2. biblioteca-frontend  → Angular + Nginx  (puerto 4200)
 #
-# INSTRUCCIONES:
-#   docker-compose up --build
-#   FrontEnd : http://localhost
-#   BackEnd  : http://localhost:8083/api/productos
+# INSTRUCCIONES DE USO:
+#   1. docker-compose up --build
+#   2. FrontEnd : http://localhost:4200
+#   3. BackEnd  : http://localhost:8082/api/libros
+#
+# PARA SUBIR A DOCKER HUB (reemplazar TU_USUARIO):
+#   docker-compose build
+#   docker tag biblioteca-backend TU_USUARIO/biblioteca-backend:latest
+#   docker tag biblioteca-frontend TU_USUARIO/biblioteca-frontend:latest
+#   docker push TU_USUARIO/biblioteca-backend:latest
+#   docker push TU_USUARIO/biblioteca-frontend:latest
 # ============================================================
-
-version: '3.8'
 
 services:
 
-  # ── FrontEnd Angular (Nginx) ──────────────────────────────
-  tienda-frontend:
+  # ── BackEnd Spring Boot + Oracle Cloud ───────────────────────
+  biblioteca-backend:
     build:
-      context: ./tienda-frontend
+      context: ./biblioteca-s4
       dockerfile: Dockerfile
-    container_name: techstore-frontend
+    container_name: biblioteca-backend
+    image: biblioteca-backend:latest
     ports:
-      - "80:80"
-    restart: unless-stopped
-    networks:
-      - techstore-net
-
-  # ── BackEnd ms-pedidos (Spring Boot + Oracle Cloud) ───────
-  ms-pedidos:
-    build:
-      context: ./ms-pedidos
-      dockerfile: Dockerfile
-    container_name: techstore-ms-pedidos
-    ports:
-      - "8083:8083"
+      - "8082:8082"
     environment:
       - DB_URL=jdbc:oracle:thin:@(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g1c6677be04d407_bibliotecadb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=no)))
       - DB_USERNAME=ADMIN
       - DB_PASSWORD=Biblioteca2026X
     restart: unless-stopped
     networks:
-      - techstore-net
+      - biblioteca-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/api/libros || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
+  # ── FrontEnd Angular (Nginx) ──────────────────────────────────
+  biblioteca-frontend:
+    build:
+      context: ./biblioteca-frontend
+      dockerfile: Dockerfile
+    container_name: biblioteca-frontend
+    image: biblioteca-frontend:latest
+    ports:
+      - "4200:80"
+    restart: unless-stopped
+    networks:
+      - biblioteca-net
+    depends_on:
+      biblioteca-backend:
+        condition: service_started
+
+# ── Red interna compartida entre servicios ────────────────────
 networks:
-  techstore-net:
+  biblioteca-net:
     driver: bridge

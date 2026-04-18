@@ -23,9 +23,16 @@ import { Libro } from '../models/libro.model';
 })
 export class LibroService {
 
-  // URL base del microservicio Spring Boot que corre localmente
-  // Puerto 8081 con context-path /api según application.properties
-  private readonly apiUrl = 'http://localhost:8081/api/libros';
+  // ============================================================
+  // URL del microservicio BackEnd
+  //
+  // En Docker Cloud: apunta al nombre del servicio definido
+  //   en docker-compose.yml ('biblioteca-backend'), que Docker
+  //   resuelve internamente en la red de contenedores.
+  //
+  // En desarrollo local: usar http://localhost:8082/api/libros
+  // ============================================================
+  private readonly apiUrl = 'http://localhost:8082/api/libros';
 
   // Inyección de dependencias: Angular entrega HttpClient automáticamente
   constructor(private http: HttpClient) {}
@@ -87,7 +94,7 @@ export class LibroService {
     let mensaje = 'Ocurrió un error inesperado.';
 
     if (error.status === 0) {
-      mensaje = 'No se puede conectar al servidor. Asegúrate de que el microservicio esté corriendo en http://localhost:8081';
+      mensaje = 'No se puede conectar al servidor. Verifica que el microservicio esté disponible.';
     } else if (error.status === 404) {
       mensaje = 'El libro solicitado no fue encontrado.';
     } else if (error.status === 400) {

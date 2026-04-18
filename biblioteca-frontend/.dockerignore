@@ -1,0 +1,30 @@
+# ============================================================
+# .dockerignore - biblioteca-frontend (FrontEnd Angular)
+# Excluye archivos innecesarios del contexto de build Docker
+# ============================================================
+
+# Dependencias (se reinstalan dentro del container con npm install)
+node_modules/
+
+# Build anterior
+dist/
+
+# Caché de Angular CLI
+.angular/
+
+# Archivos de IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Documentación y entregables locales
+*.md
+*.zip
+*.rar

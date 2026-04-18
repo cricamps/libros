@@ -1,0 +1,25 @@
+# ============================================================
+# .dockerignore - biblioteca-s4 (BackEnd)
+# Excluye archivos innecesarios del contexto de build Docker
+# ============================================================
+
+# Carpeta de compilación local (se recompila dentro del container)
+target/
+
+# Archivos de IDE
+.idea/
+.vscode/
+*.iml
+
+# Git
+.git/
+.gitignore
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Documentación y entregables locales
+*.md
+*.zip
+*.rar
