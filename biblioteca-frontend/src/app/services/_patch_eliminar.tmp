@@ -1,0 +1,11 @@
+  it('eliminar() debería enviar DELETE', () => {
+    service.eliminar(1).subscribe({
+      next: () => {
+        // DELETE exitoso: no interesa el valor retornado (void)
+        expect(true).toBeTrue();
+      }
+    });
+
+    const req = httpMock.expectOne(`${API_URL}/1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null, { status: 204, statusText: 'No Content' });
