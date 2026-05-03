@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ProductoService } from '../../services/producto.service';
 import { AuthService } from '../../services/auth.service';
 import { Pedido } from '../../models/producto.model';
@@ -11,8 +12,9 @@ import { Pedido } from '../../models/producto.model';
   imports: [CommonModule, RouterLink],
   templateUrl: './mis-pedidos.component.html'
 })
-export class MisPedidosComponent implements OnInit {
+export class MisPedidosComponent implements OnInit, OnDestroy {
   pedidos: Pedido[] = [];
+  private sub!: Subscription;
 
   constructor(
     private productoSvc: ProductoService,
@@ -21,7 +23,16 @@ export class MisPedidosComponent implements OnInit {
 
   ngOnInit(): void {
     const usuario = this.auth.getUsuario()!;
-    this.pedidos = this.productoSvc.getPedidosPorUsuario(usuario.id);
+    // Suscripción reactiva: se actualiza cuando se realiza un nuevo pedido
+    this.sub = this.productoSvc.getPedidosPorUsuario$(usuario.id)
+      .subscribe(pedidos => {
+        // Mostrar más recientes primero
+        this.pedidos = [...pedidos].sort((a, b) => b.id - a.id);
+      });
+  }
+
+  ngOnDestroy(): void {
+    if (this.sub) this.sub.unsubscribe();
   }
 
   formatearPrecio(precio: number): string {
@@ -29,7 +40,7 @@ export class MisPedidosComponent implements OnInit {
   }
 
   getBadgeClass(estado: string): string {
-    const mapa: any = {
+    const mapa: Record<string, string> = {
       'PENDIENTE':  'bg-warning text-dark',
       'PROCESANDO': 'bg-info text-dark',
       'ENVIADO':    'bg-primary',

@@ -1,7 +1,7 @@
 // ============================================================
 // SERVICIO: ProductoService
 // Patrón Singleton (providedIn: 'root')
-// Patrón Observer (BehaviorSubject para carrito y productos)
+// Patrón Observer (BehaviorSubject para carrito, productos y pedidos)
 // Patrón Facade (abstrae la lógica de productos y carrito)
 // Datos estáticos: arreglos en memoria
 // ============================================================
@@ -90,15 +90,15 @@ export class ProductoService {
   // ── Observer: carrito reactivo ───────────────────────────────
   private carrito$ = new BehaviorSubject<ItemCarrito[]>([]);
 
-  // ── Observer: lista de pedidos ───────────────────────────────
-  private pedidos: Pedido[] = [
+  // ── Observer: pedidos reactivos (BehaviorSubject para que Mis Pedidos se actualice) ──
+  private pedidos$ = new BehaviorSubject<Pedido[]>([
     {
       id: 1,
       usuarioId: 2,
       items: [{ producto: this.productos[0], cantidad: 1 }],
       total: 899990,
       estado: 'ENTREGADO',
-      fecha: '2024-11-10'
+      fecha: '2026-01-15'
     },
     {
       id: 2,
@@ -109,9 +109,9 @@ export class ProductoService {
       ],
       total: 339970,
       estado: 'ENVIADO',
-      fecha: '2025-01-05'
+      fecha: '2026-03-20'
     }
-  ];
+  ]);
 
   // ── Obtener catálogo completo ────────────────────────────────
   getProductos(): Observable<Producto[]> {
@@ -205,24 +205,38 @@ export class ProductoService {
   realizarPedido(usuarioId: number): Pedido | null {
     const items = this.getCarritoArray();
     if (items.length === 0) return null;
+
+    const listaPedidos = this.pedidos$.getValue();
     const pedido: Pedido = {
-      id: this.pedidos.length + 1,
+      id: listaPedidos.length + 1,
       usuarioId,
       items: [...items],
       total: this.getTotalCarrito(),
       estado: 'PENDIENTE',
-      fecha: new Date().toISOString().split('T')[0]
+      fecha: new Date().toISOString().split('T')[0]   // 2026-xx-xx
     };
-    this.pedidos.push(pedido);
+
+    // Emitir nueva lista incluyendo el pedido recién creado
+    this.pedidos$.next([...listaPedidos, pedido]);
     this.vaciarCarrito();
     return pedido;
   }
 
+  // Observable de pedidos por usuario — se actualiza automáticamente
+  getPedidosPorUsuario$(usuarioId: number): Observable<Pedido[]> {
+    return new Observable(obs => {
+      this.pedidos$.subscribe(pedidos => {
+        obs.next(pedidos.filter(p => p.usuarioId === usuarioId));
+      });
+    });
+  }
+
+  // Versión sincrónica (para compatibilidad y tests)
   getPedidosPorUsuario(usuarioId: number): Pedido[] {
-    return this.pedidos.filter(p => p.usuarioId === usuarioId);
+    return this.pedidos$.getValue().filter(p => p.usuarioId === usuarioId);
   }
 
   getTodosPedidos(): Pedido[] {
-    return [...this.pedidos];
+    return [...this.pedidos$.getValue()];
   }
 }

@@ -16,12 +16,14 @@ export const routes: Routes = [
 
   // Protegidas (cualquier usuario logueado)
   { path: 'catalogo',     canActivate: [authGuard], loadComponent: () => import('./components/catalogo/catalogo.component').then(m => m.CatalogoComponent) },
+  { path: 'catalogo/:id', canActivate: [authGuard], loadComponent: () => import('./components/detalle-producto/detalle-producto.component').then(m => m.DetalleProductoComponent) },
   { path: 'carrito',      canActivate: [authGuard], loadComponent: () => import('./components/carrito/carrito.component').then(m => m.CarritoComponent) },
   { path: 'mis-pedidos',  canActivate: [authGuard], loadComponent: () => import('./components/mis-pedidos/mis-pedidos.component').then(m => m.MisPedidosComponent) },
   { path: 'perfil',       canActivate: [authGuard], loadComponent: () => import('./components/perfil/perfil.component').then(m => m.PerfilComponent) },
 
   // Solo ADMIN
-  { path: 'admin-productos', canActivate: [authGuard, adminGuard], loadComponent: () => import('./components/admin-productos/admin-productos.component').then(m => m.AdminProductosComponent) },
+  { path: 'admin-productos',     canActivate: [authGuard, adminGuard], loadComponent: () => import('./components/admin-productos/admin-productos.component').then(m => m.AdminProductosComponent) },
+  { path: 'admin-productos/:id', canActivate: [authGuard, adminGuard], loadComponent: () => import('./components/detalle-producto/detalle-producto.component').then(m => m.DetalleProductoComponent) },
 
   { path: '**', redirectTo: 'login' }
 ];

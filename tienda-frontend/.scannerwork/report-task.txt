@@ -1,0 +1,6 @@
+projectKey=tienda-online-frontend
+serverUrl=http://localhost:9000
+serverVersion=26.3.0.120487
+dashboardUrl=http://localhost:9000/dashboard?id=tienda-online-frontend
+ceTaskId=b76c7468-1f49-4331-8911-4acfa214ecef
+ceTaskUrl=http://localhost:9000/api/ce/task?id=b76c7468-1f49-4331-8911-4acfa214ecef

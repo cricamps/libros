@@ -20,9 +20,7 @@
   --transicion: all 0.3s ease;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   font-family: 'Inter', sans-serif;
@@ -38,106 +36,64 @@ body {
   box-shadow: var(--sombra);
   padding: 0.75rem 0;
 }
-
 .navbar-techstore .navbar-brand {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-blanco) !important;
   letter-spacing: -0.5px;
 }
-
-.navbar-techstore .navbar-brand span {
-  color: var(--color-acento);
-}
-
+.navbar-techstore .navbar-brand span { color: var(--color-acento); }
 .navbar-techstore .nav-link {
   color: rgba(255,255,255,0.85) !important;
   font-weight: 500;
   transition: var(--transicion);
-  border-radius: 8px;
-  padding: 0.4rem 0.8rem !important;
 }
-
 .navbar-techstore .nav-link:hover,
 .navbar-techstore .nav-link.active {
-  color: var(--color-blanco) !important;
-  background: rgba(255,255,255,0.15);
+  color: var(--color-acento) !important;
+}
+.navbar-techstore .navbar-toggler { border-color: rgba(255,255,255,0.3); }
+.navbar-techstore .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255,255,255,0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-.navbar-toggler {
-  border-color: rgba(255,255,255,0.4);
-}
-
-/* ── Cards de producto ── */
-.producto-card {
-  border: none;
-  border-radius: var(--radio);
-  box-shadow: var(--sombra);
-  transition: var(--transicion);
-  overflow: hidden;
-  height: 100%;
-}
-
-.producto-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(27,108,168,0.2);
-}
-
-.producto-card .card-img-top {
-  height: 200px;
-  object-fit: cover;
-  background: linear-gradient(135deg, #e8f4fd, #d0e8f5);
-}
-
-.producto-card .producto-icono {
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #e8f4fd 0%, #d0e8f5 100%);
-  font-size: 4rem;
-  color: var(--color-primario);
-}
-
-.producto-card .card-body {
-  padding: 1.25rem;
-}
-
-.producto-card .precio {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--color-primario);
-}
-
-.badge-categoria {
-  background-color: var(--color-acento);
+/* ── Hero Section ── */
+.hero-section {
+  background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-primario) 100%);
   color: var(--color-blanco);
-  font-size: 0.7rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 20px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  padding: 3rem 0 2.5rem;
+  margin-bottom: 2rem;
 }
+.hero-section h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.hero-section p { opacity: 0.85; margin: 0; }
+
+/* ── Page Header (paginas internas) ── */
+.page-header {
+  background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-primario) 100%);
+  color: var(--color-blanco);
+  padding: 1.5rem 0;
+  margin-bottom: 2rem;
+}
+.page-header h2 { margin: 0; font-weight: 700; }
 
 /* ── Botones ── */
 .btn-techstore {
   background: linear-gradient(135deg, var(--color-primario), var(--color-acento));
-  color: var(--color-blanco);
+  color: var(--color-blanco) !important;
   border: none;
   border-radius: 8px;
   font-weight: 600;
-  padding: 0.5rem 1.25rem;
   transition: var(--transicion);
 }
-
 .btn-techstore:hover {
-  opacity: 0.9;
-  color: var(--color-blanco);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(27,108,168,0.4);
+  box-shadow: 0 4px 15px rgba(27,108,168,0.4);
+  color: var(--color-blanco) !important;
 }
-
 .btn-outline-techstore {
   border: 2px solid var(--color-primario);
   color: var(--color-primario);
@@ -146,89 +102,55 @@ body {
   background: transparent;
   transition: var(--transicion);
 }
-
 .btn-outline-techstore:hover {
   background: var(--color-primario);
   color: var(--color-blanco);
 }
 
-/* ── Formularios ── */
+/* ── Form card ── */
 .form-card {
   background: var(--color-blanco);
   border-radius: var(--radio);
   box-shadow: var(--sombra);
   padding: 2rem;
   max-width: 480px;
-  margin: 2rem auto;
+  width: 100%;
 }
 
-.form-card .logo-area {
-  text-align: center;
-  margin-bottom: 1.5rem;
+/* ── Productos ── */
+.producto-card {
+  border: none;
+  border-radius: var(--radio);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  transition: var(--transicion);
+  overflow: hidden;
 }
-
-.form-card .logo-area .logo-icon {
-  font-size: 3rem;
+.producto-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+.producto-icono {
+  background: linear-gradient(135deg, #e8f4fd, #d0ebff);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  position: relative;
+}
+.badge-categoria {
+  background: rgba(27,108,168,0.12);
   color: var(--color-primario);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid rgba(27,108,168,0.25);
 }
-
-.form-card .logo-area h2 {
-  font-weight: 700;
-  color: var(--color-secundario);
-  margin-top: 0.5rem;
-}
-
-.form-control:focus,
-.form-select:focus {
-  border-color: var(--color-primario);
-  box-shadow: 0 0 0 0.2rem rgba(27,108,168,0.25);
-}
-
-.form-label {
-  font-weight: 500;
-  color: var(--color-secundario);
-}
-
-/* ── Hero section ── */
-.hero-section {
-  background: linear-gradient(135deg, var(--color-secundario) 0%, var(--color-primario) 60%, var(--color-acento) 100%);
-  color: var(--color-blanco);
-  padding: 4rem 0;
-  margin-bottom: 2rem;
-}
-
-.hero-section h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-}
-
-.hero-section p {
+.precio {
   font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-/* ── Página de título ── */
-.page-header {
-  background: linear-gradient(135deg, var(--color-secundario), var(--color-primario));
-  color: var(--color-blanco);
-  padding: 2rem 0;
-  margin-bottom: 2rem;
-  border-radius: 0 0 20px 20px;
-}
-
-.page-header h2 {
   font-weight: 700;
-  margin: 0;
-}
-
-/* ── Carrito badge ── */
-.carrito-badge {
-  background: var(--color-peligro);
-  color: white;
-  border-radius: 50%;
-  padding: 0.1rem 0.4rem;
-  font-size: 0.7rem;
-  font-weight: 700;
+  color: var(--color-primario);
 }
 
 /* ── Tabla admin ── */
@@ -238,55 +160,46 @@ body {
   box-shadow: var(--sombra);
   overflow: hidden;
 }
-
-.tabla-admin th {
-  background: var(--color-secundario);
-  color: var(--color-blanco);
+.tabla-admin .table th {
+  background: #f8f9fa;
   font-weight: 600;
-  border: none;
-  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #dee2e6;
 }
+.tabla-admin .table td { vertical-align: middle; }
 
-.tabla-admin td {
-  vertical-align: middle;
-  padding: 0.85rem 1rem;
-  border-color: #e9ecef;
+/* ── Filas clickeables ── */
+.fila-clickeable:hover {
+  background-color: rgba(27,108,168,0.06) !important;
+  transition: background-color 0.15s ease;
 }
+.fila-clickeable:hover .fw-semibold { color: var(--color-primario); }
 
-.tabla-admin tr:hover td {
-  background-color: #f0f4f8;
+/* ── Formularios ── */
+.form-control:focus, .form-select:focus {
+  border-color: var(--color-primario);
+  box-shadow: 0 0 0 0.2rem rgba(27,108,168,0.2);
 }
-
-/* ── Validaciones ── */
-.invalid-feedback {
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.password-strength {
-  height: 6px;
-  border-radius: 3px;
-  transition: var(--transicion);
-  margin-top: 0.4rem;
-}
+.form-control.is-valid, .form-select.is-valid { border-color: var(--color-exito); }
+.form-control.is-invalid, .form-select.is-invalid { border-color: var(--color-peligro); }
 
 /* ── Footer ── */
 .footer-techstore {
   background: var(--color-secundario);
-  color: rgba(255,255,255,0.7);
-  padding: 1.5rem 0;
-  margin-top: 3rem;
+  color: rgba(255,255,255,0.6);
+  padding: 1rem 0;
   text-align: center;
   font-size: 0.9rem;
 }
-
 .footer-techstore span {
   color: var(--color-acento);
   font-weight: 600;
 }
 
 /* ── Responsivo ── */
-/* Mobile: < 576px */
 @media (max-width: 575.98px) {
   .hero-section h1 { font-size: 1.6rem; }
   .hero-section p  { font-size: 0.95rem; }
@@ -294,14 +207,10 @@ body {
   .producto-card .producto-icono { height: 150px; font-size: 3rem; }
   .navbar-techstore .navbar-brand { font-size: 1.2rem; }
 }
-
-/* Tablet: 576px – 991px */
 @media (min-width: 576px) and (max-width: 991.98px) {
   .hero-section h1 { font-size: 2rem; }
   .form-card       { max-width: 520px; }
 }
-
-/* Desktop: >= 992px */
 @media (min-width: 992px) {
   .hero-section h1 { font-size: 2.8rem; }
 }

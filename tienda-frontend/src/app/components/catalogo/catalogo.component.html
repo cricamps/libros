@@ -69,7 +69,7 @@
   <!-- Grid de productos -->
   <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
     <div class="col" *ngFor="let producto of productosFiltrados">
-      <div class="card producto-card">
+      <div class="card producto-card" style="cursor:pointer" (click)="verDetalle(producto.id)">
 
         <!-- Icono / imagen -->
         <div class="producto-icono">
@@ -86,7 +86,7 @@
         <div class="card-body d-flex flex-column">
           <h6 class="card-title fw-bold mb-1">{{ producto.nombre }}</h6>
           <p class="card-text text-muted small flex-grow-1" style="font-size:0.8rem">
-            {{ producto.descripcion }}
+            {{ producto.descripcion | slice:0:80 }}...
           </p>
 
           <div class="d-flex justify-content-between align-items-center mt-2">
@@ -94,22 +94,29 @@
             <small class="text-muted">Stock: {{ producto.stock }}</small>
           </div>
 
-          <button class="btn mt-3 w-100"
-                  [class.btn-techstore]="producto.disponible && agregarExito !== producto.id"
-                  [class.btn-success]="agregarExito === producto.id"
-                  [class.btn-secondary]="!producto.disponible"
-                  [disabled]="!producto.disponible"
-                  (click)="agregarAlCarrito(producto)">
-            <span *ngIf="agregarExito === producto.id">
-              <i class="bi bi-check-lg me-1"></i> ¡Agregado!
-            </span>
-            <span *ngIf="agregarExito !== producto.id && producto.disponible">
-              <i class="bi bi-cart-plus me-1"></i> Agregar
-            </span>
-            <span *ngIf="!producto.disponible">
-              <i class="bi bi-x-circle me-1"></i> No disponible
-            </span>
-          </button>
+          <!-- Botones -->
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-sm btn-outline-techstore flex-grow-1"
+                    (click)="verDetalle(producto.id); $event.stopPropagation()">
+              <i class="bi bi-eye me-1"></i>Ver
+            </button>
+            <button class="btn btn-sm flex-grow-1"
+                    [class.btn-techstore]="producto.disponible && agregarExito !== producto.id"
+                    [class.btn-success]="agregarExito === producto.id"
+                    [class.btn-secondary]="!producto.disponible"
+                    [disabled]="!producto.disponible"
+                    (click)="agregarAlCarrito(producto); $event.stopPropagation()">
+              <span *ngIf="agregarExito === producto.id">
+                <i class="bi bi-check-lg"></i>
+              </span>
+              <span *ngIf="agregarExito !== producto.id && producto.disponible">
+                <i class="bi bi-cart-plus"></i>
+              </span>
+              <span *ngIf="!producto.disponible">
+                <i class="bi bi-x-circle"></i>
+              </span>
+            </button>
+          </div>
         </div>
 
       </div>

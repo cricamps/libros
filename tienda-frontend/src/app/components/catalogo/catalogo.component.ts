@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../models/producto.model';
 
 @Component({
   selector: 'app-catalogo',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './catalogo.component.html'
 })
 export class CatalogoComponent implements OnInit {
@@ -20,7 +20,10 @@ export class CatalogoComponent implements OnInit {
   ordenPrecio = '';
   agregarExito: number | null = null;
 
-  constructor(private productoSvc: ProductoService) {}
+  constructor(
+    private productoSvc: ProductoService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.productos = this.productoSvc.getProductosArray();
@@ -50,6 +53,10 @@ export class CatalogoComponent implements OnInit {
     }
 
     this.productosFiltrados = resultado;
+  }
+
+  verDetalle(id: number): void {
+    this.router.navigate(['/catalogo', id]);
   }
 
   agregarAlCarrito(producto: Producto): void {

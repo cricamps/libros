@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../models/producto.model';
 
@@ -21,11 +22,25 @@ export class AdminProductosComponent implements OnInit {
   categorias = ['Computadores','Celulares','Audio','Monitores','Periféricos','Tablets','Accesorios'];
   iconos     = ['💻','📱','🎧','🖥️','⌨️','🖱️','📟','🎮','📷','🖨️'];
 
-  constructor(private fb: FormBuilder, private productoSvc: ProductoService) {}
+  constructor(
+    private fb: FormBuilder,
+    private productoSvc: ProductoService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.cargarProductos();
     this.iniciarForm();
+
+    // Si viene con ?editar=id (desde detalle-producto), abrir formulario directo
+    this.route.queryParams.subscribe(params => {
+      const id = Number(params['editar']);
+      if (id) {
+        const p = this.productoSvc.getProductoPorId(id);
+        if (p) this.editarProducto(p);
+      }
+    });
   }
 
   cargarProductos(): void {
@@ -48,6 +63,10 @@ export class AdminProductosComponent implements OnInit {
   get descripcion() { return this.form.get('descripcion')!; }
   get precio()      { return this.form.get('precio')!; }
   get stock()       { return this.form.get('stock')!; }
+
+  verDetalle(id: number): void {
+    this.router.navigate(['/admin-productos', id]);
+  }
 
   abrirNuevo(): void {
     this.modoEdicion = false;
