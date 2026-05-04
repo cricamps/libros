@@ -3,8 +3,11 @@
 // Patrón Singleton (providedIn: 'root')
 // Patrón Observer (BehaviorSubject)
 // Patrón Facade (abstrae productos, carrito y pedidos)
-// Conectado a BackEnd Spring Boot puertos 8081 y 8083
-// Fallback a datos estáticos si el BackEnd no está disponible
+// ============================================================
+// Microservicios:
+//   MS-Usuarios  (8081): autenticacion y usuarios
+//   MS-Gestion   (8082): CRUD admin de productos
+//   MS-Pedidos   (8083): busqueda/compra de productos
 // ============================================================
 
 import { Injectable } from '@angular/core';
@@ -16,9 +19,10 @@ import { Producto, ItemCarrito, Pedido } from '../models/producto.model';
 @Injectable({ providedIn: 'root' })
 export class ProductoService {
 
-  private readonly API_PRODUCTOS  = 'http://localhost:8081/api/productos';
-  private readonly API_PEDIDOS    = 'http://localhost:8083/api/pedidos';
-  private readonly API_MS_PRODUCTOS = 'http://localhost:8083/api/productos';
+  // ── URLs de los 3 microservicios ────────────────────────────
+  private readonly API_GESTION  = 'http://localhost:8082/api/gestion/productos';  // MS-Gestion
+  private readonly API_CATALOGO = 'http://localhost:8083/api/productos';           // MS-Pedidos
+  private readonly API_PEDIDOS  = 'http://localhost:8083/api/pedidos';             // MS-Pedidos
 
   // ── Datos estáticos: fallback cuando el BackEnd no responde ──
   private productos: Producto[] = [
@@ -45,60 +49,52 @@ export class ProductoService {
       precio: 299990, stock: 15, categoria: 'Tablets', icono: '📟', disponible: false }
   ];
 
-  private carrito$  = new BehaviorSubject<ItemCarrito[]>([]);
-  private pedidos$  = new BehaviorSubject<Pedido[]>([
+  private carrito$ = new BehaviorSubject<ItemCarrito[]>([]);
+  private pedidos$ = new BehaviorSubject<Pedido[]>([
     { id: 1, usuarioId: 2, items: [{ producto: this.productos[0], cantidad: 1 }],
       total: 899990, estado: 'ENTREGADO', fecha: '2026-01-15' },
     { id: 2, usuarioId: 2,
       items: [{ producto: this.productos[2], cantidad: 2 }, { producto: this.productos[4], cantidad: 1 }],
       total: 339970, estado: 'ENVIADO', fecha: '2026-03-20' }
   ]);
-  private backendDisponible = false;
 
   constructor(private readonly http: HttpClient) {
-    this.inicializarDesdeBackEnd();
+    this.cargarCatalogoDesdeBackEnd();
   }
 
-  // ── Inicializar: cargar productos desde BackEnd al arrancar ──
-  private inicializarDesdeBackEnd(): void {
-    // Intenta cargar desde ms-pedidos (8083) primero, luego ms-principal (8081)
-    this.http.get<Producto[]>(this.API_MS_PRODUCTOS)
-      .pipe(catchError(() =>
-        this.http.get<Producto[]>(this.API_PRODUCTOS).pipe(catchError(() => of([])))
-      ))
+  // ── Cargar catálogo desde MS-Pedidos (8083) al arrancar ─────
+  private cargarCatalogoDesdeBackEnd(): void {
+    this.http.get<any[]>(this.API_CATALOGO)
+      .pipe(catchError(() => of([])))
       .subscribe(prods => {
         if (prods && prods.length > 0) {
-          // Mapear campos del BackEnd al modelo del FrontEnd
           this.productos = prods.map(p => ({
-            ...p,
-            icono: this.getIconoPorCategoria((p as any).categoria || 'General'),
-            disponible: (p as any).disponible ?? ((p as any).stock > 0)
+            id: p.id, nombre: p.nombre, descripcion: p.descripcion,
+            precio: p.precio, stock: p.stock, categoria: p.categoria,
+            icono: this.iconoPorCategoria(p.categoria),
+            disponible: p.disponible ?? (p.stock > 0)
           }));
-          this.backendDisponible = true;
         }
       });
   }
 
-  private getIconoPorCategoria(categoria: string): string {
-    const iconos: Record<string, string> = {
-      'Computadores': '💻', 'Celulares': '📱', 'Audio': '🎧',
-      'Monitores': '🖥️', 'Periféricos': '⌨️', 'Tablets': '📟',
-      'Accesorios': '🔌', 'General': '📦'
+  private iconoPorCategoria(cat: string): string {
+    const m: Record<string, string> = {
+      'Computadores':'💻','Celulares':'📱','Audio':'🎧','Monitores':'🖥️',
+      'Periféricos':'⌨️','Tablets':'📟','Accesorios':'🔌'
     };
-    return iconos[categoria] || '📦';
+    return m[cat] || '📦';
   }
 
-  // ── Catálogo ─────────────────────────────────────────────────
+  // ── Catálogo (MS-Pedidos 8083) ────────────────────────────────
   getProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(this.API_MS_PRODUCTOS).pipe(
+    return this.http.get<Producto[]>(this.API_CATALOGO).pipe(
       tap(prods => { if (prods?.length) this.productos = prods; }),
       catchError(() => of([...this.productos]))
     );
   }
 
-  getProductosArray(): Producto[] {
-    return [...this.productos];
-  }
+  getProductosArray(): Producto[] { return [...this.productos]; }
 
   getProductoPorId(id: number): Producto | undefined {
     return this.productos.find(p => p.id === id);
@@ -108,16 +104,14 @@ export class ProductoService {
     return [...new Set(this.productos.map(p => p.categoria))];
   }
 
-  // ── ADMIN: CRUD conectado al BackEnd (8081) ──────────────────
+  // ── CRUD Admin → MS-Gestion (8082) ───────────────────────────
   agregarProducto(producto: Omit<Producto, 'id'>): void {
     const nuevo: Producto = {
       ...producto,
       id: Math.max(...this.productos.map(p => p.id)) + 1
     };
     this.productos.push(nuevo);
-
-    // Persistir en Oracle via BackEnd
-    this.http.post<Producto>(this.API_PRODUCTOS, nuevo)
+    this.http.post<Producto>(this.API_GESTION, nuevo)
       .pipe(catchError(() => of(null)))
       .subscribe(p => { if (p?.id) nuevo.id = p.id; });
   }
@@ -126,10 +120,8 @@ export class ProductoService {
     const idx = this.productos.findIndex(p => p.id === id);
     if (idx === -1) return false;
     this.productos[idx] = { ...this.productos[idx], ...datos };
-
-    this.http.put<Producto>(`${this.API_PRODUCTOS}/${id}`, this.productos[idx])
-      .pipe(catchError(() => of(null)))
-      .subscribe();
+    this.http.put<Producto>(`${this.API_GESTION}/${id}`, this.productos[idx])
+      .pipe(catchError(() => of(null))).subscribe();
     return true;
   }
 
@@ -137,21 +129,14 @@ export class ProductoService {
     const idx = this.productos.findIndex(p => p.id === id);
     if (idx === -1) return false;
     this.productos.splice(idx, 1);
-
-    this.http.delete(`${this.API_PRODUCTOS}/${id}`)
-      .pipe(catchError(() => of(null)))
-      .subscribe();
+    this.http.delete(`${this.API_GESTION}/${id}`)
+      .pipe(catchError(() => of(null))).subscribe();
     return true;
   }
 
-  // ── Carrito ──────────────────────────────────────────────────
-  getCarrito(): Observable<ItemCarrito[]> {
-    return this.carrito$.asObservable();
-  }
-
-  getCarritoArray(): ItemCarrito[] {
-    return this.carrito$.getValue();
-  }
+  // ── Carrito ───────────────────────────────────────────────────
+  getCarrito(): Observable<ItemCarrito[]> { return this.carrito$.asObservable(); }
+  getCarritoArray(): ItemCarrito[] { return this.carrito$.getValue(); }
 
   agregarAlCarrito(producto: Producto, cantidad: number = 1): void {
     const actual = [...this.carrito$.getValue()];
@@ -177,9 +162,7 @@ export class ProductoService {
     );
   }
 
-  vaciarCarrito(): void {
-    this.carrito$.next([]);
-  }
+  vaciarCarrito(): void { this.carrito$.next([]); }
 
   getTotalCarrito(): number {
     return this.carrito$.getValue().reduce((s, i) => s + i.producto.precio * i.cantidad, 0);
@@ -189,31 +172,23 @@ export class ProductoService {
     return this.carrito$.getValue().reduce((s, i) => s + i.cantidad, 0);
   }
 
-  // ── Pedidos: conectado a ms-pedidos (8083) ───────────────────
+  // ── Pedidos → MS-Pedidos (8083) ──────────────────────────────
   realizarPedido(usuarioId: number): Pedido | null {
     const items = this.getCarritoArray();
     if (items.length === 0) return null;
-
     const pedido: Pedido = {
       id: this.pedidos$.getValue().length + 1,
-      usuarioId,
-      items: [...items],
+      usuarioId, items: [...items],
       total: this.getTotalCarrito(),
       estado: 'PENDIENTE',
       fecha: new Date().toISOString().split('T')[0]
     };
-
     this.pedidos$.next([...this.pedidos$.getValue(), pedido]);
     this.vaciarCarrito();
-
-    // Persistir pedido en BackEnd
-    this.http.post(`${this.API_PEDIDOS}`, {
-      usuarioId,
-      total: pedido.total,
-      estado: pedido.estado,
+    this.http.post(this.API_PEDIDOS, {
+      usuarioId, total: pedido.total, estado: pedido.estado,
       items: items.map(i => ({ productoId: i.producto.id, cantidad: i.cantidad, precio: i.producto.precio }))
     }).pipe(catchError(() => of(null))).subscribe();
-
     return pedido;
   }
 
@@ -229,7 +204,5 @@ export class ProductoService {
     return this.pedidos$.getValue().filter(p => p.usuarioId === usuarioId);
   }
 
-  getTodosPedidos(): Pedido[] {
-    return [...this.pedidos$.getValue()];
-  }
+  getTodosPedidos(): Pedido[] { return [...this.pedidos$.getValue()]; }
 }
