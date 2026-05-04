@@ -2,87 +2,72 @@
 // SERVICIO: AuthService
 // Patrón Singleton (providedIn: 'root')
 // Patrón Observer (BehaviorSubject)
-// Gestiona autenticación con datos estáticos (listas/arreglos)
+// Conectado a BackEnd Spring Boot puerto 8081
+// Fallback a datos estáticos si el BackEnd no está disponible
 // ============================================================
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { Usuario } from '../models/usuario.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  // ── Datos estáticos: lista de usuarios registrados ──────────
+  private readonly API = 'http://localhost:8081/api';
+
+  // Fallback: datos estáticos cuando el BackEnd no está disponible
   private usuarios: Usuario[] = [
-    {
-      id: 1,
-      nombre: 'Admin',
-      apellido: 'TechStore',
-      email: 'admin@techstore.cl',
-      password: 'Admin@123',
-      rol: 'ADMIN',
-      telefono: '+56912345678',
-      direccion: 'Santiago, Chile',
-      fechaRegistro: '2024-01-15'
-    },
-    {
-      id: 2,
-      nombre: 'Juan',
-      apellido: 'Pérez',
-      email: 'juan@cliente.cl',
-      password: 'Cliente@123',
-      rol: 'CLIENTE',
-      telefono: '+56987654321',
-      direccion: 'Valparaíso, Chile',
-      fechaRegistro: '2024-03-20'
-    },
-    {
-      id: 3,
-      nombre: 'María',
-      apellido: 'González',
-      email: 'maria@cliente.cl',
-      password: 'Maria@456!',
-      rol: 'CLIENTE',
-      telefono: '+56955555555',
-      direccion: 'Concepción, Chile',
-      fechaRegistro: '2024-05-10'
-    }
+    { id: 1, nombre: 'Admin', apellido: 'TechStore', email: 'admin@techstore.cl',
+      password: 'Admin@123', rol: 'ADMIN', telefono: '+56912345678',
+      direccion: 'Santiago, Chile', fechaRegistro: '2026-01-15' },
+    { id: 2, nombre: 'Juan', apellido: 'Pérez', email: 'juan@cliente.cl',
+      password: 'Cliente@123', rol: 'CLIENTE', telefono: '+56987654321',
+      direccion: 'Valparaíso, Chile', fechaRegistro: '2026-03-20' },
+    { id: 3, nombre: 'María', apellido: 'González', email: 'maria@cliente.cl',
+      password: 'Maria@456!', rol: 'CLIENTE', telefono: '+56955555555',
+      direccion: 'Concepción, Chile', fechaRegistro: '2026-05-10' }
   ];
 
-  // ── Observer: estado actual del usuario logueado ─────────────
   private usuarioActual$ = new BehaviorSubject<Usuario | null>(null);
 
-  // ── Singleton: instancia única gestionada por Angular ────────
-  constructor() {
-    // Recuperar sesión guardada (si existe)
+  constructor(private readonly http: HttpClient) {
     const guardado = sessionStorage.getItem('usuario');
     if (guardado) {
       this.usuarioActual$.next(JSON.parse(guardado));
     }
   }
 
-  // Expone el observable del usuario actual
   getUsuarioActual(): Observable<Usuario | null> {
     return this.usuarioActual$.asObservable();
   }
 
-  // Retorna el valor sincrónico actual
   getUsuario(): Usuario | null {
     return this.usuarioActual$.getValue();
   }
 
-  // Verifica si hay sesión activa
   estaLogueado(): boolean {
     return this.usuarioActual$.getValue() !== null;
   }
 
-  // Verifica rol ADMIN
   esAdmin(): boolean {
     return this.usuarioActual$.getValue()?.rol === 'ADMIN';
   }
 
-  // ── Login: busca en la lista estática ───────────────────────
+  // ── Login: intenta BackEnd, fallback a datos estáticos ──────
   login(email: string, password: string): boolean {
+    // Intento en BackEnd (asíncrono, para registro en Oracle)
+    this.http.post<Usuario>(`${this.API}/auth/login`, { email, password })
+      .pipe(catchError(() => of(null)))
+      .subscribe(u => {
+        if (u) {
+          this.usuarioActual$.next(u);
+          sessionStorage.setItem('usuario', JSON.stringify(u));
+        }
+      });
+
+    // Respuesta sincrónica con datos estáticos (UX inmediata)
     const usuario = this.usuarios.find(
       u => u.email === email && u.password === password
     );
@@ -94,13 +79,12 @@ export class AuthService {
     return false;
   }
 
-  // ── Logout ──────────────────────────────────────────────────
   logout(): void {
     this.usuarioActual$.next(null);
     sessionStorage.removeItem('usuario');
   }
 
-  // ── Registro: agrega a la lista estática ────────────────────
+  // ── Registro: BackEnd + fallback estático ───────────────────
   registrar(datos: Omit<Usuario, 'id' | 'rol' | 'fechaRegistro'>): boolean {
     const existe = this.usuarios.find(u => u.email === datos.email);
     if (existe) return false;
@@ -112,10 +96,15 @@ export class AuthService {
       fechaRegistro: new Date().toISOString().split('T')[0]
     };
     this.usuarios.push(nuevo);
+
+    // Registrar también en BackEnd Oracle
+    this.http.post<Usuario>(`${this.API}/usuarios`, nuevo)
+      .pipe(catchError(() => of(null)))
+      .subscribe();
+
     return true;
   }
 
-  // ── Actualizar perfil ────────────────────────────────────────
   actualizarPerfil(datos: Partial<Usuario>): void {
     const actual = this.getUsuario();
     if (!actual) return;
@@ -125,16 +114,28 @@ export class AuthService {
       this.usuarios[idx] = { ...this.usuarios[idx], ...datos };
       this.usuarioActual$.next(this.usuarios[idx]);
       sessionStorage.setItem('usuario', JSON.stringify(this.usuarios[idx]));
+
+      // Actualizar en BackEnd Oracle
+      this.http.put<Usuario>(`${this.API}/usuarios/${actual.id}`, this.usuarios[idx])
+        .pipe(catchError(() => of(null)))
+        .subscribe();
     }
   }
 
-  // ── Recuperar contraseña: verifica si el email existe ───────
   emailExiste(email: string): boolean {
     return this.usuarios.some(u => u.email === email);
   }
 
-  // ── Obtener todos los usuarios (solo ADMIN) ──────────────────
   getUsuarios(): Usuario[] {
     return [...this.usuarios];
+  }
+
+  // ── Cargar usuarios desde BackEnd ────────────────────────────
+  cargarUsuariosDesdeBackEnd(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.API}/usuarios`)
+      .pipe(
+        tap(usuarios => { if (usuarios?.length) this.usuarios = usuarios; }),
+        catchError(() => of(this.usuarios))
+      );
   }
 }
