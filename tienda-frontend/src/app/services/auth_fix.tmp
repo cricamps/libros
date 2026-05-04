@@ -1,0 +1,10 @@
+  it('debería guardar usuario en sessionStorage al hacer login', () => {
+    service.login('admin@techstore.cl', 'Admin@123');
+    // El sessionStorage se setea sincrónicamente en el login estático
+    const guardado = sessionStorage.getItem('usuario');
+    expect(guardado).not.toBeNull();
+    const parsed = JSON.parse(guardado!);
+    expect(parsed.email).toBe('admin@techstore.cl');
+    // Absorber la petición HTTP asíncrona al BackEnd
+    httpMock.expectOne(r => r.url.includes('auth/login')).flush({});
+  });

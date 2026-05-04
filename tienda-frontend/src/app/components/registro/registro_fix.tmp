@@ -1,0 +1,5 @@
+  it('debería retornar texto Débil para fuerza 2', () => {
+    // 'Segura1' tiene: longitud>=8 ✓, número ✓ → score=2 → 'Débil'
+    component.form.get('password')!.setValue('Segura11');
+    expect(component.getFuerzaTexto()).toBe('Débil');
+  });

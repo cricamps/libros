@@ -1,0 +1,26 @@
+  // ── Observable ────────────────────────────────────────────
+  it('debería emitir el usuario actual mediante observable', (done) => {
+    service.login('juan@cliente.cl', 'Cliente@123');
+    // skip(1) salta la emisión inicial del BehaviorSubject (null)
+    service.getUsuarioActual().subscribe(u => {
+      if (u && u.email) {
+        expect(u.email).toBe('juan@cliente.cl');
+        done();
+      }
+    });
+  });
+
+  it('debería emitir null después del logout', (done) => {
+    service.login('juan@cliente.cl', 'Cliente@123');
+    service.logout();
+    // El BehaviorSubject emite el valor actual sincronicamente
+    let llamadas = 0;
+    service.getUsuarioActual().subscribe(u => {
+      llamadas++;
+      if (llamadas === 1) {
+        // Primera emisión: valor actual (null tras logout)
+        expect(u).toBeNull();
+        done();
+      }
+    });
+  });

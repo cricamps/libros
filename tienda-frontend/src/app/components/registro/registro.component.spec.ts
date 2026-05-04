@@ -1,7 +1,7 @@
 // ============================================================
 // PRUEBAS UNITARIAS: RegistroComponent
 // ============================================================
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { RegistroComponent } from './registro.component';
@@ -99,19 +99,26 @@ describe('RegistroComponent', () => {
     expect(component.getFuerzaColor()).toBe('#2ecc71');
   });
 
-  it('debería retornar texto de fuerza correspondiente', () => {
+  it('debería retornar texto Fuerte para password segura', () => {
     component.form.get('password')!.setValue('Segura@123');
     expect(component.getFuerzaTexto()).toBe('Fuerte');
   });
 
-  it('debería retornar texto Muy débil para password débil', () => {
+  it('debería retornar texto Muy débil para password muy débil', () => {
     component.form.get('password')!.setValue('a');
     expect(component.getFuerzaTexto()).toBe('Muy débil');
   });
 
   it('debería retornar texto Débil para fuerza 2', () => {
-    component.form.get('password')!.setValue('segura1');
+    // longitud>=8 ✓ + número ✓ = score 2 → 'Débil'
+    component.form.get('password')!.setValue('segura12');
     expect(component.getFuerzaTexto()).toBe('Débil');
+  });
+
+  it('debería retornar texto Buena para fuerza 3', () => {
+    // longitud>=8 ✓ + número ✓ + mayúscula ✓ = score 3 → 'Buena'
+    component.form.get('password')!.setValue('Segura12');
+    expect(component.getFuerzaTexto()).toBe('Buena');
   });
 
   it('no debería llamar a registrar si el formulario es inválido', () => {

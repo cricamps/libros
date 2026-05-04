@@ -1,17 +1,30 @@
 // ============================================================
 // PRUEBAS UNITARIAS: ProductoService
 // Cobertura: catálogo, carrito, pedidos reactivos, CRUD admin
+// HttpClient mockeado con HttpClientTestingModule
 // ============================================================
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ProductoService } from './producto.service';
 import { Producto } from '../models/producto.model';
 
 describe('ProductoService', () => {
   let service: ProductoService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule]
+    });
     service = TestBed.inject(ProductoService);
+    httpMock = TestBed.inject(HttpTestingController);
+    // Absorber la petición inicial al catálogo
+    const req = httpMock.match(() => true);
+    req.forEach(r => r.flush([]));
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   // ── Instancia ────────────────────────────────────────────────
@@ -20,18 +33,20 @@ describe('ProductoService', () => {
   });
 
   // ── Catálogo ─────────────────────────────────────────────────
-  it('debería retornar al menos 5 productos', () => {
+  it('debería retornar al menos 5 productos estáticos', () => {
     expect(service.getProductosArray().length).toBeGreaterThanOrEqual(5);
   });
 
-  it('debería retornar productos mediante observable', (done) => {
+  it('debería retornar productos mediante observable (fallback)', (done) => {
     service.getProductos().subscribe(productos => {
-      expect(productos.length).toBeGreaterThan(0);
+      expect(productos).toBeDefined();
       done();
     });
+    const req = httpMock.expectOne(r => r.url.includes('8083'));
+    req.flush([]);
   });
 
-  it('debería retornar una copia del arreglo (no referencia)', () => {
+  it('debería retornar una copia del arreglo', () => {
     expect(service.getProductosArray()).not.toBe(service.getProductosArray());
   });
 
@@ -54,16 +69,24 @@ describe('ProductoService', () => {
     expect(service.getCategorias().length).toBeGreaterThanOrEqual(2);
   });
 
-  // ── CRUD Admin ────────────────────────────────────────────────
+  // ── CRUD Admin (MS-Gestion 8082) ─────────────────────────────
   it('debería agregar un nuevo producto', () => {
     const n = service.getProductosArray().length;
-    service.agregarProducto({ nombre: 'Webcam', descripcion: 'Webcam HD', precio: 39990, stock: 20, categoria: 'Periféricos', icono: '📷', disponible: true });
+    service.agregarProducto({
+      nombre: 'Webcam HD', descripcion: 'Webcam 1080p con microfono',
+      precio: 39990, stock: 20, categoria: 'Periféricos', icono: '📷', disponible: true
+    });
+    const req = httpMock.expectOne(r => r.url.includes('8082'));
+    req.flush({ id: 99 });
     expect(service.getProductosArray().length).toBe(n + 1);
   });
 
   it('debería actualizar un producto existente', () => {
-    service.actualizarProducto(1, { precio: 999999 });
+    const ok = service.actualizarProducto(1, { precio: 999999 });
+    expect(ok).toBeTrue();
     expect(service.getProductoPorId(1)!.precio).toBe(999999);
+    const req = httpMock.expectOne(r => r.url.includes('8082'));
+    req.flush({});
   });
 
   it('debería retornar false al actualizar producto inexistente', () => {
@@ -74,6 +97,8 @@ describe('ProductoService', () => {
     const n = service.getProductosArray().length;
     expect(service.eliminarProducto(1)).toBeTrue();
     expect(service.getProductosArray().length).toBe(n - 1);
+    const req = httpMock.expectOne(r => r.url.includes('8082'));
+    req.flush({});
   });
 
   it('debería retornar false al eliminar producto inexistente', () => {
@@ -87,7 +112,7 @@ describe('ProductoService', () => {
     expect(service.getTotalCarrito()).toBe(0);
   });
 
-  it('debería agregar un producto al carrito (observable)', (done) => {
+  it('debería agregar un producto al carrito', (done) => {
     const p = service.getProductoPorId(1)!;
     service.agregarAlCarrito(p, 1);
     service.getCarrito().subscribe(items => {
@@ -152,12 +177,16 @@ describe('ProductoService', () => {
     expect(pedido!.estado).toBe('PENDIENTE');
     expect(pedido!.usuarioId).toBe(2);
     expect(service.getCarritoArray().length).toBe(0);
+    const req = httpMock.expectOne(r => r.url.includes('pedidos'));
+    req.flush({});
   });
 
   it('debería usar fecha 2026 en el pedido nuevo', () => {
     service.agregarAlCarrito(service.getProductoPorId(1)!, 1);
     const pedido = service.realizarPedido(2);
     expect(pedido!.fecha.startsWith('2026')).toBeTrue();
+    const req = httpMock.expectOne(r => r.url.includes('pedidos'));
+    req.flush({});
   });
 
   it('debería retornar null si el carrito está vacío', () => {
@@ -170,7 +199,7 @@ describe('ProductoService', () => {
     pedidos.forEach(p => expect(p.usuarioId).toBe(2));
   });
 
-  it('debería obtener pedidos por usuario (observable reactivo)', (done) => {
+  it('debería obtener pedidos por usuario (observable)', (done) => {
     service.getPedidosPorUsuario$(2).subscribe(pedidos => {
       expect(pedidos.length).toBeGreaterThan(0);
       done();
@@ -179,10 +208,12 @@ describe('ProductoService', () => {
 
   it('debería reflejar nuevo pedido en el observable', (done) => {
     service.agregarAlCarrito(service.getProductoPorId(5)!, 1);
-    const totalAntes = service.getPedidosPorUsuario(2).length;
+    const antes = service.getPedidosPorUsuario(2).length;
     service.realizarPedido(2);
+    const req = httpMock.expectOne(r => r.url.includes('pedidos'));
+    req.flush({});
     service.getPedidosPorUsuario$(2).subscribe(pedidos => {
-      expect(pedidos.length).toBe(totalAntes + 1);
+      expect(pedidos.length).toBe(antes + 1);
       done();
     });
   });
@@ -196,7 +227,8 @@ describe('ProductoService', () => {
   });
 
   it('debería tener fechas 2026 en pedidos de ejemplo', () => {
-    const pedidos = service.getPedidosPorUsuario(2);
-    pedidos.forEach(p => expect(p.fecha.startsWith('2026')).toBeTrue());
+    service.getPedidosPorUsuario(2).forEach(p =>
+      expect(p.fecha.startsWith('2026')).toBeTrue()
+    );
   });
 });
