@@ -5,9 +5,9 @@
 // Patrón Facade (abstrae productos, carrito y pedidos)
 // ============================================================
 // Microservicios:
-//   MS-Usuarios  (8081): autenticacion y usuarios
-//   MS-Gestion   (8082): CRUD admin de productos
-//   MS-Pedidos   (8083): busqueda/compra de productos
+//   MS-Usuarios (8081): autenticacion y usuarios
+//   MS-Gestion  (8082): CRUD admin de productos → /api/gestion/productos
+//   MS-Pedidos  (8083): busqueda/compra          → /api/productos | /api/pedidos
 // ============================================================
 
 import { Injectable } from '@angular/core';
@@ -15,14 +15,10 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Producto, ItemCarrito, Pedido } from '../models/producto.model';
+import { ENDPOINTS } from './api-config';
 
 @Injectable({ providedIn: 'root' })
 export class ProductoService {
-
-  // ── URLs de los 3 microservicios ────────────────────────────
-  private readonly API_GESTION  = 'http://localhost:8082/api/gestion/productos';  // MS-Gestion
-  private readonly API_CATALOGO = 'http://localhost:8083/api/productos';           // MS-Pedidos
-  private readonly API_PEDIDOS  = 'http://localhost:8083/api/pedidos';             // MS-Pedidos
 
   // ── Datos estáticos: fallback cuando el BackEnd no responde ──
   private productos: Producto[] = [
@@ -62,9 +58,9 @@ export class ProductoService {
     this.cargarCatalogoDesdeBackEnd();
   }
 
-  // ── Cargar catálogo desde MS-Pedidos (8083) al arrancar ─────
+  // ── Cargar catálogo desde MS-Pedidos al arrancar ─────────────
   private cargarCatalogoDesdeBackEnd(): void {
-    this.http.get<any[]>(this.API_CATALOGO)
+    this.http.get<any[]>(ENDPOINTS.catalogo)
       .pipe(catchError(() => of([])))
       .subscribe(prods => {
         if (prods && prods.length > 0) {
@@ -72,7 +68,7 @@ export class ProductoService {
             id: p.id, nombre: p.nombre, descripcion: p.descripcion,
             precio: p.precio, stock: p.stock, categoria: p.categoria,
             icono: this.iconoPorCategoria(p.categoria),
-            disponible: p.disponible ?? (p.stock > 0)
+            disponible: p.disponible === 1 || p.disponible === true || (p.stock > 0)
           }));
         }
       });
@@ -81,15 +77,23 @@ export class ProductoService {
   private iconoPorCategoria(cat: string): string {
     const m: Record<string, string> = {
       'Computadores':'💻','Celulares':'📱','Audio':'🎧','Monitores':'🖥️',
-      'Periféricos':'⌨️','Tablets':'📟','Accesorios':'🔌'
+      'Periféricos':'⌨️','Perifericos':'⌨️','Tablets':'📟','Accesorios':'🔌'
     };
     return m[cat] || '📦';
   }
 
   // ── Catálogo (MS-Pedidos 8083) ────────────────────────────────
   getProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(this.API_CATALOGO).pipe(
-      tap(prods => { if (prods?.length) this.productos = prods; }),
+    return this.http.get<any[]>(ENDPOINTS.catalogo).pipe(
+      tap(prods => {
+        if (prods?.length) {
+          this.productos = prods.map(p => ({
+            ...p,
+            icono: this.iconoPorCategoria(p.categoria),
+            disponible: p.disponible === 1 || p.disponible === true || (p.stock > 0)
+          }));
+        }
+      }),
       catchError(() => of([...this.productos]))
     );
   }
@@ -104,14 +108,14 @@ export class ProductoService {
     return [...new Set(this.productos.map(p => p.categoria))];
   }
 
-  // ── CRUD Admin → MS-Gestion (8082) ───────────────────────────
+  // ── CRUD Admin → MS-Gestion (8082) → /api/gestion/productos ──
   agregarProducto(producto: Omit<Producto, 'id'>): void {
     const nuevo: Producto = {
       ...producto,
-      id: Math.max(...this.productos.map(p => p.id)) + 1
+      id: Math.max(...this.productos.map(p => p.id), 0) + 1
     };
     this.productos.push(nuevo);
-    this.http.post<Producto>(this.API_GESTION, nuevo)
+    this.http.post<Producto>(ENDPOINTS.gestionProductos, nuevo)
       .pipe(catchError(() => of(null)))
       .subscribe(p => { if (p?.id) nuevo.id = p.id; });
   }
@@ -120,7 +124,7 @@ export class ProductoService {
     const idx = this.productos.findIndex(p => p.id === id);
     if (idx === -1) return false;
     this.productos[idx] = { ...this.productos[idx], ...datos };
-    this.http.put<Producto>(`${this.API_GESTION}/${id}`, this.productos[idx])
+    this.http.put<Producto>(`${ENDPOINTS.gestionProductos}/${id}`, this.productos[idx])
       .pipe(catchError(() => of(null))).subscribe();
     return true;
   }
@@ -129,7 +133,7 @@ export class ProductoService {
     const idx = this.productos.findIndex(p => p.id === id);
     if (idx === -1) return false;
     this.productos.splice(idx, 1);
-    this.http.delete(`${this.API_GESTION}/${id}`)
+    this.http.delete(`${ENDPOINTS.gestionProductos}/${id}`)
       .pipe(catchError(() => of(null))).subscribe();
     return true;
   }
@@ -172,7 +176,7 @@ export class ProductoService {
     return this.carrito$.getValue().reduce((s, i) => s + i.cantidad, 0);
   }
 
-  // ── Pedidos → MS-Pedidos (8083) ──────────────────────────────
+  // ── Pedidos → MS-Pedidos (8083) → /api/pedidos ───────────────
   realizarPedido(usuarioId: number): Pedido | null {
     const items = this.getCarritoArray();
     if (items.length === 0) return null;
@@ -185,10 +189,19 @@ export class ProductoService {
     };
     this.pedidos$.next([...this.pedidos$.getValue(), pedido]);
     this.vaciarCarrito();
-    this.http.post(this.API_PEDIDOS, {
-      usuarioId, total: pedido.total, estado: pedido.estado,
-      items: items.map(i => ({ productoId: i.producto.id, cantidad: i.cantidad, precio: i.producto.precio }))
+
+    // Body alineado exactamente con PedidoRequest.java del BackEnd
+    this.http.post(ENDPOINTS.pedidos, {
+      usuarioId,
+      total: pedido.total,
+      estado: pedido.estado,
+      items: items.map(i => ({
+        productoId: i.producto.id,
+        cantidad: i.cantidad,
+        precio: i.producto.precio
+      }))
     }).pipe(catchError(() => of(null))).subscribe();
+
     return pedido;
   }
 

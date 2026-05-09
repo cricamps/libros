@@ -2,6 +2,7 @@ package com.duoc.pedidos.service;
 
 import com.duoc.pedidos.factory.PedidoFactory;
 import com.duoc.pedidos.model.Pedido;
+import com.duoc.pedidos.model.PedidoRequest;
 import com.duoc.pedidos.model.Producto;
 import com.duoc.pedidos.repository.PedidoRepository;
 import com.duoc.pedidos.repository.ProductoRepository;
@@ -12,138 +13,80 @@ import java.util.Optional;
 
 /**
  * ============================================================
- * PATRÓN DE DISEÑO: SINGLETON
- * ============================================================
- * Clase: PedidoService
- *
- * Spring Boot crea UNA sola instancia de esta clase y la
- * reutiliza en todos los controladores que la inyecten.
- *
- * Responsabilidades:
- *  1. Lógica de búsqueda y visualización de productos
- *  2. Lógica de creación y gestión de pedidos
- *  3. Validaciones de negocio (stock, disponibilidad)
- *
- * Usa PedidoFactory (patrón Factory) para construir
- * los objetos Pedido antes de persistirlos en Oracle.
+ * SERVICIO: PedidoService
+ * PATRÓN SINGLETON – Spring crea una sola instancia (@Service).
+ * Centraliza la lógica de catálogo de productos y pedidos.
+ * Usa PedidoFactory para garantizar integridad al crear pedidos.
  * ============================================================
  */
 @Service
 public class PedidoService {
 
-    private final ProductoRepository productoRepository;
-    private final PedidoRepository   pedidoRepository;
-    private final PedidoFactory       pedidoFactory;
+    private final ProductoRepository productoRepo;
+    private final PedidoRepository pedidoRepo;
+    private final PedidoFactory pedidoFactory;
 
-    public PedidoService(ProductoRepository productoRepository,
-                         PedidoRepository pedidoRepository,
+    // Inyección por constructor (Singleton pattern)
+    public PedidoService(ProductoRepository productoRepo,
+                         PedidoRepository pedidoRepo,
                          PedidoFactory pedidoFactory) {
-        this.productoRepository = productoRepository;
-        this.pedidoRepository   = pedidoRepository;
-        this.pedidoFactory      = pedidoFactory;
+        this.productoRepo = productoRepo;
+        this.pedidoRepo = pedidoRepo;
+        this.pedidoFactory = pedidoFactory;
     }
 
-    // ══════════════════════════════════════════════════════
-    // PRODUCTOS — búsqueda y visualización
-    // ══════════════════════════════════════════════════════
+    // ── Catálogo de Productos ─────────────────────────────────
 
-    /** GET /api/productos — todos los productos */
+    /** Todos los productos */
     public List<Producto> obtenerTodosProductos() {
-        return productoRepository.findAll();
+        return productoRepo.findAll();
     }
 
-    /** GET /api/productos/disponibles — solo disponibles */
+    /** Solo productos disponibles */
     public List<Producto> obtenerProductosDisponibles() {
-        return productoRepository.findByDisponibleTrue();
+        return productoRepo.findByDisponibleTrue();
     }
 
-    /** GET /api/productos/{id} — detalle de un producto */
+    /** Buscar producto por ID */
     public Optional<Producto> obtenerProductoPorId(Long id) {
-        return productoRepository.findById(id);
+        return productoRepo.findById(id);
     }
 
-    /** GET /api/productos/buscar?nombre=X — búsqueda por nombre */
+    /** Buscar por nombre (parcial, case-insensitive) */
     public List<Producto> buscarPorNombre(String nombre) {
-        return productoRepository.buscarPorNombre(nombre);
+        return productoRepo.buscarPorNombre(nombre);
     }
 
-    /** GET /api/productos/categoria/{cat} — filtrar por categoría */
+    /** Filtrar por categoría */
     public List<Producto> obtenerPorCategoria(String categoria) {
-        return productoRepository.findByCategoriaIgnoreCase(categoria);
+        return productoRepo.findByCategoriaIgnoreCase(categoria);
     }
 
-    // ══════════════════════════════════════════════════════
-    // PEDIDOS — compra y gestión
-    // ══════════════════════════════════════════════════════
+    // ── Pedidos ──────────────────────────────────────────────
 
-    /**
-     * POST /api/pedidos — realizar una compra.
-     * Valida stock y disponibilidad antes de crear el pedido.
-     * Usa PedidoFactory para construir el objeto Pedido.
-     */
-    public Pedido realizarPedido(Long usuarioId, Long productoId, Integer cantidad) {
-        Producto producto = productoRepository.findById(productoId)
-            .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + productoId));
-
-        if (!producto.getDisponible()) {
-            throw new RuntimeException("El producto '" + producto.getNombre() + "' no está disponible.");
+    /** Crear nuevo pedido usando PedidoFactory (PATRÓN FACTORY) */
+    public Pedido crearPedido(PedidoRequest request) {
+        // PedidoFactory asigna estado PENDIENTE y fecha actual
+        Pedido pedido = pedidoFactory.crear(request.getUsuarioId(), request.getTotal());
+        // Respetar estado si viene explícito en el request
+        if (request.getEstado() != null && !request.getEstado().isBlank()) {
+            pedido.setEstado(request.getEstado());
         }
-        if (producto.getStock() < cantidad) {
-            throw new RuntimeException("Stock insuficiente. Disponible: " + producto.getStock());
-        }
-
-        // Actualizar stock
-        producto.setStock(producto.getStock() - cantidad);
-        if (producto.getStock() == 0) producto.setDisponible(false);
-        productoRepository.save(producto);
-
-        // Crear pedido usando la Factory (patrón Factory)
-        Pedido nuevoPedido = pedidoFactory.crearPedido(
-            usuarioId, productoId, producto.getNombre(),
-            cantidad, producto.getPrecio()
-        );
-
-        return pedidoRepository.save(nuevoPedido);
+        return pedidoRepo.save(pedido);
     }
 
-    /** GET /api/pedidos — todos los pedidos (ADMIN) */
-    public List<Pedido> obtenerTodosPedidos() {
-        return pedidoRepository.findAll();
-    }
-
-    /** GET /api/pedidos/usuario/{usuarioId} — historial por usuario */
+    /** Pedidos del usuario ordenados por fecha descendente */
     public List<Pedido> obtenerPedidosPorUsuario(Long usuarioId) {
-        return pedidoRepository.findByUsuarioIdOrderByFechaDesc(usuarioId);
+        return pedidoRepo.findByUsuarioIdOrderByFechaDesc(usuarioId);
     }
 
-    /** GET /api/pedidos/{id} — detalle de un pedido */
+    /** Todos los pedidos (uso admin) */
+    public List<Pedido> obtenerTodosPedidos() {
+        return pedidoRepo.findAll();
+    }
+
+    /** Buscar pedido por ID */
     public Optional<Pedido> obtenerPedidoPorId(Long id) {
-        return pedidoRepository.findById(id);
-    }
-
-    /**
-     * PUT /api/pedidos/{id}/estado — actualizar estado.
-     * Estados válidos: PENDIENTE, PROCESANDO, ENVIADO, ENTREGADO.
-     * Usa PedidoFactory para construir el objeto actualizado.
-     */
-    public Optional<Pedido> actualizarEstado(Long id, String nuevoEstado) {
-        List<String> estadosValidos = List.of("PENDIENTE", "PROCESANDO", "ENVIADO", "ENTREGADO");
-        if (!estadosValidos.contains(nuevoEstado.toUpperCase())) {
-            throw new RuntimeException("Estado inválido. Valores permitidos: " + estadosValidos);
-        }
-        return pedidoRepository.findById(id).map(existente -> {
-            // Usa PedidoFactory para construir el pedido con nuevo estado
-            Pedido actualizado = pedidoFactory.actualizarEstado(existente, nuevoEstado.toUpperCase());
-            return pedidoRepository.save(actualizado);
-        });
-    }
-
-    /** DELETE /api/pedidos/{id} — cancelar pedido */
-    public boolean cancelarPedido(Long id) {
-        if (pedidoRepository.existsById(id)) {
-            pedidoRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        return pedidoRepo.findById(id);
     }
 }

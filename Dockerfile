@@ -1,0 +1,19 @@
+# ============================================================
+# Dockerfile – ms-usuarios (proyecto full3)
+# Microservicio de Control de Usuarios y Autenticación
+# Puerto: 8081
+# ============================================================
+
+FROM eclipse-temurin:21-jdk-alpine AS build
+WORKDIR /app
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+RUN ./mvnw dependency:go-offline -q
+COPY src ./src
+RUN ./mvnw package -DskipTests -q
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar ms-usuarios.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "ms-usuarios.jar"]

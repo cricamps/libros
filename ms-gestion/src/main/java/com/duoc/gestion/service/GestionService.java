@@ -10,41 +10,38 @@ import java.util.Optional;
 
 /**
  * ============================================================
- * PATRON SINGLETON: GestionService
- * Spring gestiona esta clase como un bean singleton.
- * Una sola instancia maneja toda la logica de negocio
- * para gestion de productos (CRUD admin).
+ * SERVICIO: GestionService
+ * PATRÓN SINGLETON – Spring crea una sola instancia (@Service).
+ * Centraliza la lógica de negocio para gestión de productos.
+ * Usa ProductoFactory para garantizar integridad al crear/clonar.
  * ============================================================
  */
 @Service
 public class GestionService {
 
-    // Inyeccion del repositorio JPA (Oracle Cloud)
-    private final ProductoRepository productoRepository;
+    private final ProductoRepository repository;
 
-    public GestionService(ProductoRepository productoRepository) {
-        this.productoRepository = productoRepository;
+    // Inyección de dependencias por constructor (Singleton pattern)
+    public GestionService(ProductoRepository repository) {
+        this.repository = repository;
     }
 
-    // Obtener todos los productos
+    // Listar todos los productos
     public List<Producto> obtenerTodos() {
-        return productoRepository.findAll();
+        return repository.findAll();
     }
 
-    // Obtener producto por ID
+    // Buscar por ID
     public Optional<Producto> obtenerPorId(Long id) {
-        return productoRepository.findById(id);
+        return repository.findById(id);
     }
 
-    // Obtener productos por categoria
+    // Filtrar por categoría
     public List<Producto> obtenerPorCategoria(String categoria) {
-        return productoRepository.findByCategoria(categoria);
+        return repository.findByCategoria(categoria);
     }
 
-    /**
-     * Agregar nuevo producto.
-     * Usa ProductoFactory para inicializar valores por defecto.
-     */
+    // Agregar nuevo producto usando Factory (PATRÓN FACTORY)
     public Producto agregar(Producto producto) {
         Producto nuevo = ProductoFactory.crearNuevo(
             producto.getNombre(),
@@ -53,39 +50,35 @@ public class GestionService {
             producto.getStock(),
             producto.getCategoria()
         );
-        // Respetar el campo disponible si viene explicitamente
+        // Respetar disponible si viene explícito
         if (producto.getDisponible() != null) {
             nuevo.setDisponible(producto.getDisponible());
         }
-        return productoRepository.save(nuevo);
+        return repository.save(nuevo);
     }
 
-    /**
-     * Modificar producto existente.
-     * Usa ProductoFactory para clonar con cambios.
-     */
-    public Optional<Producto> modificar(Long id, Producto cambios) {
-        return productoRepository.findById(id).map(existente -> {
-            Producto actualizado = ProductoFactory.clonarConCambios(existente, cambios);
-            return productoRepository.save(actualizado);
+    // Modificar producto existente usando Factory (clonar con cambios)
+    public Optional<Producto> modificar(Long id, Producto datos) {
+        return repository.findById(id).map(existente -> {
+            Producto actualizado = ProductoFactory.clonarConCambios(existente, datos);
+            return repository.save(actualizado);
         });
     }
 
-    /**
-     * Eliminar producto por ID.
-     * Retorna true si existia y fue eliminado, false si no existia.
-     */
+    // Eliminar producto
     public boolean eliminar(Long id) {
-        if (!productoRepository.existsById(id)) return false;
-        productoRepository.deleteById(id);
-        return true;
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     // Cambiar disponibilidad de un producto
     public Optional<Producto> cambiarDisponibilidad(Long id, boolean disponible) {
-        return productoRepository.findById(id).map(p -> {
+        return repository.findById(id).map(p -> {
             p.setDisponible(disponible);
-            return productoRepository.save(p);
+            return repository.save(p);
         });
     }
 }

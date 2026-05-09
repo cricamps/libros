@@ -17,8 +17,6 @@ target/
 # -------------------------------------------------------
 # IDEs
 # -------------------------------------------------------
-
-### STS ###
 .apt_generated
 .classpath
 .factorypath
@@ -26,24 +24,17 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
-
-### NetBeans ###
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
-### VS Code ###
 .vscode/
 
 # -------------------------------------------------------
@@ -57,9 +48,18 @@ npm-debug.log*
 tienda-frontend/node_modules/
 tienda-frontend/.angular/
 tienda-frontend/dist/
+tienda-frontend/.scannerwork/
+tienda-frontend/coverage/
 biblioteca-frontend/node_modules/
 biblioteca-frontend/.angular/
 biblioteca-frontend/dist/
+
+# -------------------------------------------------------
+# Archivos temporales de scripts
+# -------------------------------------------------------
+_zip_tmp_*/
+*.tmp
+*.log
 
 # -------------------------------------------------------
 # Archivos del sistema operativo
@@ -79,3 +79,14 @@ ewallet.p12
 tnsnames.ora
 sqlnet.ora
 ojdbc.properties
+
+# -------------------------------------------------------
+# mvnw copiados por preparar-microservicios.ps1
+# (se regeneran con el script antes del build)
+# -------------------------------------------------------
+ms-gestion/mvnw
+ms-gestion/mvnw.cmd
+ms-gestion/.mvn/
+ms-pedidos/mvnw
+ms-pedidos/mvnw.cmd
+ms-pedidos/.mvn/

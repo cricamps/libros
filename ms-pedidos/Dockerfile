@@ -1,35 +1,19 @@
 # ============================================================
-# Dockerfile - BackEnd ms-pedidos (Spring Boot)
-# Multi-stage: build con Maven → run con JRE
-# DSY2205 - Sumativa 2
+# Dockerfile – ms-pedidos
+# Microservicio de Búsqueda, Visualización y Compra
+# Puerto: 8083
 # ============================================================
 
-# ── Etapa 1: Build con Maven ──────────────────────────────
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
-
-# Copiar pom.xml y descargar dependencias (caché de capas)
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copiar código fuente y compilar
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+RUN ./mvnw dependency:go-offline -q
 COPY src ./src
-RUN mvn clean package -DskipTests -B
+RUN ./mvnw package -DskipTests -q
 
-# ── Etapa 2: Runtime con JRE mínimo ──────────────────────
 FROM eclipse-temurin:21-jre-alpine
-LABEL maintainer="TechStore DSY2205"
-
 WORKDIR /app
-
-# Copiar JAR generado
-COPY --from=build /app/target/ms-pedidos-1.0.0.jar app.jar
-
-# Variables de entorno (se sobreescriben en docker-compose)
-ENV DB_URL=""
-ENV DB_USERNAME="ADMIN"
-ENV DB_PASSWORD=""
-
+COPY --from=build /app/target/*.jar ms-pedidos.jar
 EXPOSE 8083
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "ms-pedidos.jar"]

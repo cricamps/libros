@@ -2,7 +2,7 @@
 // SERVICIO: AuthService
 // Patrón Singleton (providedIn: 'root')
 // Patrón Observer (BehaviorSubject)
-// Conectado a BackEnd Spring Boot puerto 8081
+// Conectado a MS-Usuarios – Spring Boot puerto 8081
 // Fallback a datos estáticos si el BackEnd no está disponible
 // ============================================================
 
@@ -11,11 +11,10 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Usuario } from '../models/usuario.model';
+import { ENDPOINTS } from './api-config';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-
-  private readonly API = 'http://localhost:8081/api';
 
   // Fallback: datos estáticos cuando el BackEnd no está disponible
   private usuarios: Usuario[] = [
@@ -57,8 +56,8 @@ export class AuthService {
 
   // ── Login: intenta BackEnd, fallback a datos estáticos ──────
   login(email: string, password: string): boolean {
-    // Intento en BackEnd (asíncrono, para registro en Oracle)
-    this.http.post<Usuario>(`${this.API}/auth/login`, { email, password })
+    // Intento en BackEnd Oracle (asíncrono)
+    this.http.post<Usuario>(ENDPOINTS.login, { email, password })
       .pipe(catchError(() => of(null)))
       .subscribe(u => {
         if (u) {
@@ -97,8 +96,8 @@ export class AuthService {
     };
     this.usuarios.push(nuevo);
 
-    // Registrar también en BackEnd Oracle
-    this.http.post<Usuario>(`${this.API}/usuarios`, nuevo)
+    // Registrar en BackEnd Oracle
+    this.http.post<Usuario>(ENDPOINTS.usuarios, nuevo)
       .pipe(catchError(() => of(null)))
       .subscribe();
 
@@ -116,7 +115,7 @@ export class AuthService {
       sessionStorage.setItem('usuario', JSON.stringify(this.usuarios[idx]));
 
       // Actualizar en BackEnd Oracle
-      this.http.put<Usuario>(`${this.API}/usuarios/${actual.id}`, this.usuarios[idx])
+      this.http.put<Usuario>(`${ENDPOINTS.usuarios}/${actual.id}`, this.usuarios[idx])
         .pipe(catchError(() => of(null)))
         .subscribe();
     }
@@ -132,7 +131,7 @@ export class AuthService {
 
   // ── Cargar usuarios desde BackEnd ────────────────────────────
   cargarUsuariosDesdeBackEnd(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.API}/usuarios`)
+    return this.http.get<Usuario[]>(ENDPOINTS.usuarios)
       .pipe(
         tap(usuarios => { if (usuarios?.length) this.usuarios = usuarios; }),
         catchError(() => of(this.usuarios))

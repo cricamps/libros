@@ -1,66 +1,120 @@
 # ============================================================
-# docker-compose.yml - Biblioteca FullStack
-# DSY2205 - Semana 6 - Actividad Formativa 4
+# docker-compose.yml – TechStore FullStack
+# DSY2205 – EFT Semana 9
 #
 # Servicios:
-#   1. biblioteca-backend   → Spring Boot      (puerto 8082)
-#   2. biblioteca-frontend  → Angular + Nginx  (puerto 4200)
+#   1. ms-usuarios   → Spring Boot  (puerto 8081) – Usuarios + Auth
+#   2. ms-gestion    → Spring Boot  (puerto 8082) – CRUD Productos (ADMIN)
+#   3. ms-pedidos    → Spring Boot  (puerto 8083) – Catálogo + Compra
+#   4. tienda-frontend → Angular+Nginx (puerto 4200)
 #
 # INSTRUCCIONES DE USO:
-#   1. docker-compose up --build
-#   2. FrontEnd : http://localhost:4200
-#   3. BackEnd  : http://localhost:8082/api/libros
+#   docker-compose up --build
 #
-# PARA SUBIR A DOCKER HUB (reemplazar TU_USUARIO):
-#   docker-compose build
-#   docker tag biblioteca-backend TU_USUARIO/biblioteca-backend:latest
-#   docker tag biblioteca-frontend TU_USUARIO/biblioteca-frontend:latest
-#   docker push TU_USUARIO/biblioteca-backend:latest
-#   docker push TU_USUARIO/biblioteca-frontend:latest
+# URLS:
+#   FrontEnd  : http://localhost:4200
+#   Usuarios  : http://localhost:8081/api/usuarios
+#   Gestión   : http://localhost:8082/api/gestion/productos
+#   Pedidos   : http://localhost:8083/api/productos
+#              http://localhost:8083/api/pedidos
+#
+# CREDENCIALES DE PRUEBA:
+#   Admin    → admin@techstore.cl / Admin@123
+#   Cliente  → juan@cliente.cl   / Cliente@123
 # ============================================================
 
 services:
 
-  # ── BackEnd Spring Boot + Oracle Cloud ───────────────────────
-  biblioteca-backend:
+  # ── 1. MS-USUARIOS (puerto 8081) ─────────────────────────────
+  ms-usuarios:
     build:
-      context: ./biblioteca-s4
+      context: .
       dockerfile: Dockerfile
-    container_name: biblioteca-backend
-    image: biblioteca-backend:latest
+    container_name: ms-usuarios
+    image: ccamps/ms-usuarios:latest
     ports:
-      - "8082:8082"
+      - "8081:8081"
     environment:
+      - SERVER_PORT=8081
       - DB_URL=jdbc:oracle:thin:@(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g1c6677be04d407_bibliotecadb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=no)))
       - DB_USERNAME=ADMIN
       - DB_PASSWORD=Biblioteca2026X
     restart: unless-stopped
     networks:
-      - biblioteca-net
+      - techstore-net
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/api/libros || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/api/usuarios || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 60s
 
-  # ── FrontEnd Angular (Nginx) ──────────────────────────────────
-  biblioteca-frontend:
+  # ── 2. MS-GESTION (puerto 8082) ──────────────────────────────
+  ms-gestion:
     build:
-      context: ./biblioteca-frontend
+      context: ./ms-gestion
       dockerfile: Dockerfile
-    container_name: biblioteca-frontend
-    image: biblioteca-frontend:latest
+    container_name: ms-gestion
+    image: ccamps/ms-gestion:latest
+    ports:
+      - "8082:8082"
+    environment:
+      - SERVER_PORT=8082
+      - DB_URL=jdbc:oracle:thin:@(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g1c6677be04d407_bibliotecadb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=no)))
+      - DB_USERNAME=ADMIN
+      - DB_PASSWORD=Biblioteca2026X
+    restart: unless-stopped
+    networks:
+      - techstore-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/api/gestion/productos || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── 3. MS-PEDIDOS (puerto 8083) ──────────────────────────────
+  ms-pedidos:
+    build:
+      context: ./ms-pedidos
+      dockerfile: Dockerfile
+    container_name: ms-pedidos
+    image: ccamps/ms-pedidos:latest
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVER_PORT=8083
+      - DB_URL=jdbc:oracle:thin:@(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g1c6677be04d407_bibliotecadb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=no)))
+      - DB_USERNAME=ADMIN
+      - DB_PASSWORD=Biblioteca2026X
+    restart: unless-stopped
+    networks:
+      - techstore-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/api/productos || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── 4. TIENDA-FRONTEND Angular + Nginx (puerto 4200) ─────────
+  tienda-frontend:
+    build:
+      context: ./tienda-frontend
+      dockerfile: Dockerfile
+    container_name: tienda-frontend
+    image: ccamps/tienda-frontend:latest
     ports:
       - "4200:80"
     restart: unless-stopped
     networks:
-      - biblioteca-net
+      - techstore-net
     depends_on:
-      biblioteca-backend:
-        condition: service_started
+      - ms-usuarios
+      - ms-gestion
+      - ms-pedidos
 
-# ── Red interna compartida entre servicios ────────────────────
+# ── Red interna compartida ────────────────────────────────────
 networks:
-  biblioteca-net:
+  techstore-net:
     driver: bridge

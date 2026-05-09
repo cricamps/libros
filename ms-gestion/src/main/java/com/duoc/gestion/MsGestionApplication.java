@@ -3,15 +3,13 @@ package com.duoc.gestion;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- * ============================================================
- * MICROSERVICIO: ms-gestion
- * Gestion de Productos (agregar, modificar, eliminar)
- * Patron Singleton: Spring gestiona GestionService como bean unico
- * Patron Factory: ProductoFactory crea instancias de Producto
- * Puerto: 8082
- * ============================================================
- */
+// ============================================================
+// MICROSERVICIO: ms-gestion
+// Gestión de Productos – solo accesible por ADMIN
+// Patrones: Singleton (GestionService) + Factory (ProductoFactory)
+// Puerto: 8082
+// Ruta base: /api/gestion/productos
+// ============================================================
 @SpringBootApplication
 public class MsGestionApplication {
     public static void main(String[] args) {
